@@ -4,9 +4,9 @@ from .shared_mocks import get_mock_open
 def mock_modules(mocker):
     mocker.patch("krux.context.logger", new=mocker.MagicMock())
     mocker.patch("krux.context.Display", new=mocker.MagicMock())
-    mocker.patch("krux.context.Input", new=mocker.MagicMock())
     mocker.patch("krux.context.Camera", new=mocker.MagicMock())
     mocker.patch("krux.context.Light", new=mocker.MagicMock())
+    mocker.patch("krux.context.Input", new=mocker.MagicMock())
 
 
 def test_init(mocker, m5stickv):

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import sys
-import os
+import math
 from unittest import mock
 import pygame as pg
 import cv2
@@ -73,19 +73,32 @@ def register(addr, val):
     pass
 
 
-def display(img, oft=None, roi=None):
+def display(img, oft=(0, 0), roi=None):
+    if roi:
+        image_width = roi[3]
+        image_height = roi[2]
+    else:
+        image_width = 240
+        image_height = 320
+    
+
     def run():
         try:
             frame = img.get_frame()
             frame = cv2.resize(
                 frame,
-                (screen.get_width(), screen.get_height()),
+                (image_width, image_height),
                 interpolation=cv2.INTER_AREA,
             )
             frame = frame.swapaxes(0, 1)
         except:
             return
-        pg.surfarray.blit_array(screen, frame)
+
+        # Create a surface for the frame
+        frame_surface = pg.surfarray.make_surface(frame)
+
+        # Blit this surface onto the screen at the specified offset
+        screen.blit(frame_surface, oft)
 
     pg.event.post(pg.event.Event(events.LCD_DISPLAY_EVENT, {"f": run}))
 
@@ -174,6 +187,50 @@ def draw_qr_code(offset_y, code_str, max_width, dark_color, light_color, backgro
     light_color = rgb565torgb888(light_color)
     pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
 
+def draw_qr_code_binary(offset_y, code_bin, max_width, dark_color, light_color, background):
+    def run():
+        starting_size = int(math.sqrt(len(code_bin) * 8))
+        block_size_divisor = starting_size + 2;  # adds 2 to create room for a 1 block border
+        scale = max_width // block_size_divisor
+        width = starting_size * scale
+        border_size = (max_width - width) // 2
+        opposite_border_offset = border_size + width - 1
+        # Top border
+        for rx in range(max_width):
+            for ry in range(border_size):
+                screen.set_at((rx, ry),light_color)
+
+        # Bottom border
+        for rx in range(max_width):
+            for ry in range(opposite_border_offset, max_width):
+                screen.set_at((rx, ry),light_color)
+
+        # Left border
+        for rx in range(border_size):
+            for ry in range(border_size, opposite_border_offset):
+                screen.set_at((rx, ry),light_color)
+
+        # Right border
+        for rx in range(opposite_border_offset, max_width):
+            for ry in range(border_size, opposite_border_offset):
+                screen.set_at((rx, ry),light_color)
+        # QR code rendering
+        for og_y in range(starting_size):
+            for og_x in range(starting_size):
+                og_yx_index = og_y * starting_size + og_x
+                color_byte = code_bin[og_yx_index >> 3]
+                color_byte &= (1 << (og_yx_index % 8))
+                color = dark_color if color_byte else light_color
+                for i in range(scale):
+                    y = border_size + og_y * scale + i
+                    for j in range(scale):
+                        x = border_size + og_x * scale + j
+                        screen.set_at((x, y),color)
+
+    dark_color = rgb565torgb888(dark_color)
+    light_color = rgb565torgb888(light_color)
+    pg.event.post(pg.event.Event(events.LCD_DRAW_QR_CODE_EVENT, {"f": run}))
+
 
 def fill_rectangle(x, y, w, h, color):
     def run():
@@ -205,6 +262,7 @@ if "lcd" not in sys.modules:
         height=height,
         draw_string=draw_string,
         draw_qr_code=draw_qr_code,
+        draw_qr_code_binary=draw_qr_code_binary,
         fill_rectangle=fill_rectangle,
         BLACK=COLOR_BLACK,
         WHITE=COLOR_WHITE,

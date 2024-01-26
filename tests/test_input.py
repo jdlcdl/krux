@@ -6,19 +6,25 @@ def reset_input_states(mocker, input):
     from krux.input import RELEASED
 
     if input.enter:
-        mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
+        mocker.patch.object(input, "enter_value", return_value=RELEASED)
+        mocker.patch.object(input, "enter_event", return_value=False)
     if input.page:
-        mocker.patch.object(input, "page_value", new=lambda: RELEASED)
+        mocker.patch.object(input, "page_value", return_value=RELEASED)
+        mocker.patch.object(input, "page_event", return_value=False)
     if input.page_prev:
-        mocker.patch.object(input, "page_prev_value", new=lambda: RELEASED)
+        mocker.patch.object(input, "page_prev_value", return_value=RELEASED)
+        mocker.patch.object(input, "page_prev_event", return_value=False)
     if input.touch:
-        mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", return_value=None
+        )
+        mocker.patch.object(input.touch, "event", return_value=False)
     return input
 
 
 def test_init(mocker, m5stickv):
-    mocker.patch("krux.input.fm.register", new=mocker.MagicMock())
-    mocker.patch("krux.input.GPIO", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
     from krux.input import Input
     import board
@@ -26,37 +32,37 @@ def test_init(mocker, m5stickv):
     input = Input()
 
     assert isinstance(input, Input)
-    krux.input.fm.register.assert_has_calls(
+    krux.buttons.fm.register.assert_has_calls(
         [
             mocker.call(board.config["krux"]["pins"]["BUTTON_A"], mocker.ANY),
             mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
         ]
     )
     assert (
-        krux.input.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        krux.buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS21"
     )
     assert (
-        krux.input.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        krux.buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS22"
     )
     assert input.enter is not None
     assert input.page is not None
 
-    assert krux.input.GPIO.call_count == 2
+    assert krux.buttons.GPIO.call_count == 2
     assert (
-        krux.input.GPIO.call_args_list[0].args[0]._extract_mock_name()
+        krux.buttons.GPIO.call_args_list[0].args[0]._extract_mock_name()
         == "mock.GPIOHS21"
     )
     assert (
-        krux.input.GPIO.call_args_list[1].args[0]._extract_mock_name()
+        krux.buttons.GPIO.call_args_list[1].args[0]._extract_mock_name()
         == "mock.GPIOHS22"
     )
 
 
 def test_init_amigo_tft(mocker, amigo_tft):
-    mocker.patch("krux.input.fm.register", new=mocker.MagicMock())
-    mocker.patch("krux.input.GPIO", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
     from krux.input import Input
     import board
@@ -64,7 +70,7 @@ def test_init_amigo_tft(mocker, amigo_tft):
     input = Input()
 
     assert isinstance(input, Input)
-    krux.input.fm.register.assert_has_calls(
+    krux.buttons.fm.register.assert_has_calls(
         [
             mocker.call(board.config["krux"]["pins"]["BUTTON_A"], mocker.ANY),
             mocker.call(board.config["krux"]["pins"]["BUTTON_B"], mocker.ANY),
@@ -72,38 +78,39 @@ def test_init_amigo_tft(mocker, amigo_tft):
         ]
     )
     assert (
-        krux.input.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        krux.buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS21"
     )
     assert (
-        krux.input.fm.register.call_args_list[1].args[1]._extract_mock_name()
+        krux.buttons.fm.register.call_args_list[1].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS22"
     )
     assert (
-        krux.input.fm.register.call_args_list[2].args[1]._extract_mock_name()
+        krux.buttons.fm.register.call_args_list[2].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS0"
     )
     assert input.enter is not None
     assert input.page is not None
     assert input.page_prev is not None
 
-    assert krux.input.GPIO.call_count == 3
+    assert krux.buttons.GPIO.call_count == 3
     assert (
-        krux.input.GPIO.call_args_list[0].args[0]._extract_mock_name()
+        krux.buttons.GPIO.call_args_list[0].args[0]._extract_mock_name()
         == "mock.GPIOHS21"
     )
     assert (
-        krux.input.GPIO.call_args_list[1].args[0]._extract_mock_name()
+        krux.buttons.GPIO.call_args_list[1].args[0]._extract_mock_name()
         == "mock.GPIOHS22"
     )
     assert (
-        krux.input.GPIO.call_args_list[2].args[0]._extract_mock_name() == "mock.GPIOHS0"
+        krux.buttons.GPIO.call_args_list[2].args[0]._extract_mock_name()
+        == "mock.GPIOHS0"
     )
 
 
 def test_init_dock(mocker, dock):
-    mocker.patch("krux.input.fm.register", new=mocker.MagicMock())
-    mocker.patch("krux.input.GPIO", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.fm.register", new=mocker.MagicMock())
+    mocker.patch("krux.buttons.GPIO", new=mocker.MagicMock())
     import krux
     from krux.input import Input
     import board
@@ -111,7 +118,7 @@ def test_init_dock(mocker, dock):
     input = Input()
 
     assert isinstance(input, Input)
-    krux.input.fm.register.assert_has_calls(
+    krux.buttons.fm.register.assert_has_calls(
         [
             mocker.call(board.config["krux"]["pins"]["BUTTON_A"], mocker.ANY),
         ]
@@ -123,7 +130,7 @@ def test_init_dock(mocker, dock):
         ]
     )
     assert (
-        krux.input.fm.register.call_args_list[0].args[1]._extract_mock_name()
+        krux.buttons.fm.register.call_args_list[0].args[1]._extract_mock_name()
         == "mock.fm.fpioa.GPIOHS21"
     )
     assert (
@@ -138,10 +145,10 @@ def test_init_dock(mocker, dock):
     assert input.page is not None
     assert input.page_prev is not None
 
-    assert krux.input.GPIO.call_count == 1
+    assert krux.buttons.GPIO.call_count == 1
     assert krux.rotary.GPIO.call_count == 2
     assert (
-        krux.input.GPIO.call_args_list[0].args[0]._extract_mock_name()
+        krux.buttons.GPIO.call_args_list[0].args[0]._extract_mock_name()
         == "mock.GPIOHS21"
     )
     assert (
@@ -225,19 +232,21 @@ def test_wait_for_release(mocker, m5stickv):
 
     input = Input()
     input = reset_input_states(mocker, input)
-    mocker.patch.object(input, "enter_value", new=lambda: PRESSED)
+    mocker.patch.object(input, "enter_event", return_value=True)
+    mocker.patch.object(input, "enter_value", return_value=PRESSED)
 
     def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=1000)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
+        mocker.patch.object(time, "ticks_ms", return_value=2000)
+        time.sleep(0.1)
+        mocker.patch.object(input, "enter_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
     t = threading.Thread(target=release)
     t.start()
-    input.wait_for_release()
+    input.wait_for_button()
     t.join()
 
     assert input.entropy > 0
@@ -252,14 +261,15 @@ def test_wait_for_button_blocks_until_enter_released(mocker, m5stickv):
     input = Input()
     input = reset_input_states(mocker, input)
 
+    mocker.patch.object(input, "enter_event", return_value=True)
+    mocker.patch.object(input, "enter_value", return_value=PRESSED)
+
     def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=1000)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "enter_value", new=lambda: PRESSED)
+        mocker.patch.object(time, "ticks_ms", return_value=1100)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
+        mocker.patch.object(input, "enter_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
@@ -281,14 +291,15 @@ def test_wait_for_button_blocks_until_page_released(mocker, m5stickv):
     input = Input()
     input = reset_input_states(mocker, input)
 
+    mocker.patch.object(input, "page_event", return_value=True)
+    mocker.patch.object(input, "page_value", return_value=PRESSED)
+
     def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=1000)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "page_value", new=lambda: PRESSED)
+        mocker.patch.object(time, "ticks_ms", return_value=1100)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input, "page_value", new=lambda: RELEASED)
+        mocker.patch.object(input, "page_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
@@ -302,7 +313,7 @@ def test_wait_for_button_blocks_until_page_released(mocker, m5stickv):
     krux.input.wdt.feed.assert_called()
 
 
-def test_wait_for_button_blocks_until_page_prev_released(mocker, amigo_tft):
+def test_wait_for_button_blocks_until_page_prev_released(mocker, m5stickv):
     import threading
     import krux
     from krux.input import Input, RELEASED, PRESSED, BUTTON_PAGE_PREV
@@ -310,27 +321,19 @@ def test_wait_for_button_blocks_until_page_prev_released(mocker, amigo_tft):
     input = Input()
     input = reset_input_states(mocker, input)
 
-    def click():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+    mocker.patch.object(input, "page_prev_event", return_value=True)
+    mocker.patch.object(input, "page_prev_value", return_value=PRESSED)
+
+    def release():
+        mocker.patch.object(time, "ticks_ms", return_value=1000)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        # if input.page_prev, "value" is mocked, in what apparently is bug,
-        # other input buttons get the same "value", invalidating the test
-        mocker.patch.object(input, "page_prev_value", new=lambda: PRESSED)
+        mocker.patch.object(time, "ticks_ms", return_value=1100)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input, "page_prev_value", new=lambda: RELEASED)
+        mocker.patch.object(input, "page_prev_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
-    # first one click to enable physical buttons
-    t = threading.Thread(target=click)
-    t.start()
-    btn = input.wait_for_button(True)
-    t.join()
-
-    # than other click to be counted
-    t = threading.Thread(target=click)
+    t = threading.Thread(target=release)
     t.start()
     btn = input.wait_for_button(True)
     t.join()
@@ -343,51 +346,20 @@ def test_wait_for_button_blocks_until_page_prev_released(mocker, amigo_tft):
 def test_wait_for_button_blocks_until_touch_released(mocker, amigo_tft):
     import threading
     import krux
-    from krux.input import Input, BUTTON_TOUCH
+    from krux.input import Input, BUTTON_TOUCH, PRESSED, RELEASED
 
     input = Input()
     input = reset_input_states(mocker, input)
 
-    def click():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
-        time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input.touch, "current_state", new=lambda: 1)
-        time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input.touch, "current_state", new=lambda: 0)
-
-    assert input.entropy == 0
-
-    t = threading.Thread(target=click)
-    t.start()
-    btn = input.wait_for_button(True)
-    t.join()
-
-    assert btn == BUTTON_TOUCH
-    assert input.entropy > 0
-    krux.input.wdt.feed.assert_called()
-
-
-def test_wait_for_button_waits_for_existing_press_to_release(mocker, m5stickv):
-    import threading
-    import krux
-    from krux.input import Input, RELEASED, PRESSED, BUTTON_ENTER
-
-    input = Input()
-    input = reset_input_states(mocker, input)
+    mocker.patch.object(input.touch, "event", return_value=True)
+    mocker.patch.object(input, "touch_value", return_value=PRESSED)
 
     def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=1000)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "page_value", new=lambda: RELEASED)
+        mocker.patch.object(time, "ticks_ms", return_value=1100)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input, "enter_value", new=lambda: PRESSED)
-        time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 300)
-        mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
+        mocker.patch.object(input, "touch_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
@@ -396,7 +368,7 @@ def test_wait_for_button_waits_for_existing_press_to_release(mocker, m5stickv):
     btn = input.wait_for_button(True)
     t.join()
 
-    assert btn == BUTTON_ENTER
+    assert btn == BUTTON_TOUCH
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
@@ -410,9 +382,9 @@ def test_wait_for_button_returns_when_nonblocking(mocker, m5stickv):
     input = reset_input_states(mocker, input)
 
     def nothing():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=0)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: QR_ANIM_PERIOD + 1)
+        mocker.patch.object(time, "ticks_ms", return_value=QR_ANIM_PERIOD + 1)
 
     t = threading.Thread(target=nothing)
     t.start()
@@ -424,28 +396,20 @@ def test_wait_for_button_returns_when_nonblocking(mocker, m5stickv):
 
 
 def test_long_press_page_simulates_swipe_left(mocker, m5stickv):
-    import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED, SWIPE_LEFT, LONG_PRESS_PERIOD
+    from krux.input import Input, RELEASED, PRESSED, SWIPE_LEFT
 
     input = Input()
     input = reset_input_states(mocker, input)
 
-    def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
-        time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "page_value", new=lambda: PRESSED)
-        time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: LONG_PRESS_PERIOD + 500)
-        mocker.patch.object(input, "page_value", new=lambda: RELEASED)
+    # Create a table of states for button events, values and time ticks
+    mocker.patch.object(time, "ticks_ms", side_effect=[0, 100, 200, 300, 1400, 1500])
+    mocker.patch.object(input, "page_event", side_effect=[False, True, False])
+    mocker.patch.object(input, "page_value", side_effect=[PRESSED, PRESSED, RELEASED])
 
     assert input.entropy == 0
 
-    t = threading.Thread(target=release)
-    t.start()
     btn = input.wait_for_button(True)
-    t.join()
 
     assert btn == SWIPE_LEFT
     assert input.entropy > 0
@@ -460,21 +424,16 @@ def test_long_press_page_prev_simulates_swipe_right(mocker, m5stickv):
     input = Input()
     input = reset_input_states(mocker, input)
 
-    def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
-        time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "page_prev_value", new=lambda: PRESSED)
-        time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: LONG_PRESS_PERIOD + 500)
-        mocker.patch.object(input, "page_prev_value", new=lambda: RELEASED)
+    # Create a table of states for button events, values and time ticks
+    mocker.patch.object(time, "ticks_ms", side_effect=[0, 100, 200, 300, 1400, 1500])
+    mocker.patch.object(input, "page_prev_event", side_effect=[False, True, False])
+    mocker.patch.object(
+        input, "page_prev_value", side_effect=[PRESSED, PRESSED, RELEASED]
+    )
 
     assert input.entropy == 0
 
-    t = threading.Thread(target=release)
-    t.start()
     btn = input.wait_for_button(True)
-    t.join()
 
     assert btn == SWIPE_RIGHT
     assert input.entropy > 0
@@ -493,29 +452,35 @@ def test_touch_indexing(mocker, amigo_tft):
 
     def time_control(point1, point2):
         nonlocal elapsed_time
-
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
         time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
         # touch on 3º quadrant
+        mocker.patch.object(input.touch, "event", return_value=True)
+        mocker.patch.object(input.touch.touch_driver, "irq_point", return_value=point1)
         mocker.patch.object(
-            input.touch.touch_driver, "current_point", new=lambda: point1
+            input.touch.touch_driver, "current_point", return_value=point1
         )
         time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
+        mocker.patch.object(input.touch, "event", return_value=False)
+        time.sleep(0.1)
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
         # touch slightly sideways before release
         mocker.patch.object(
-            input.touch.touch_driver, "current_point", new=lambda: point2
+            input.touch.touch_driver, "current_point", return_value=point2
         )
         time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
-        mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
+        # release touch
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", return_value=None
+        )
         time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
 
     # full screen as single touch button
     input.touch.clear_regions()
@@ -545,6 +510,7 @@ def test_touch_indexing(mocker, amigo_tft):
 
 
 def test_touch_gestures(mocker, amigo_tft):
+    # TODO: Replace threads by side_effect for stability
     import threading
     import krux
     from krux.input import Input, SWIPE_LEFT, SWIPE_RIGHT, SWIPE_UP, SWIPE_DOWN
@@ -557,28 +523,34 @@ def test_touch_gestures(mocker, amigo_tft):
     def time_control(point1, point2):
         nonlocal elapsed_time
 
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
-        time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
-        # touch on 3º quadrant
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
+        mocker.patch.object(input.touch, "event", return_value=True)
+        mocker.patch.object(input.touch.touch_driver, "irq_point", return_value=point1)
         mocker.patch.object(
-            input.touch.touch_driver, "current_point", new=lambda: point1
+            input.touch.touch_driver, "current_point", return_value=point1
         )
         time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
-        # swipe
+        # Detect press event
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
+        time.sleep(0.1)
+        mocker.patch.object(input.touch.touch_driver, "event", return_value=False)
+        time.sleep(0.1)
+        # Swipe
         mocker.patch.object(
-            input.touch.touch_driver, "current_point", new=lambda: point2
+            input.touch.touch_driver, "current_point", return_value=point2
         )
         time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
-        mocker.patch.object(input.touch.touch_driver, "current_point", new=lambda: None)
+        # Release
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
+        mocker.patch.object(
+            input.touch.touch_driver, "current_point", return_value=None
+        )
         time.sleep(0.1)
-        elapsed_time += 500
-        mocker.patch.object(time, "ticks_ms", new=lambda: elapsed_time)
+        elapsed_time += 200
+        mocker.patch.object(time, "ticks_ms", return_value=elapsed_time)
 
     # Swipe Right
     input.touch.clear_regions()
@@ -637,27 +609,27 @@ def test_encoder_spin_right(mocker, dock):
     from krux.input import Input, RELEASED, BUTTON_PAGE
 
     input = Input()
-    mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
+    mocker.patch.object(input.enter, "value", return_value=RELEASED)
 
     def spin():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=0)
 
         # Here it will count a PAGE press
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
+        mocker.patch.object(time, "ticks_ms", return_value=100)
         krux.rotary.encoder.process((0, 1))
 
         # Keep spining through all modes
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
+        mocker.patch.object(time, "ticks_ms", return_value=200)
         krux.rotary.encoder.process((1, 1))
 
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 300)
+        mocker.patch.object(time, "ticks_ms", return_value=300)
         krux.rotary.encoder.process((1, 0))
 
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 400)
+        mocker.patch.object(time, "ticks_ms", return_value=400)
         krux.rotary.encoder.process((0, 0))
 
     t = threading.Thread(target=spin)
@@ -676,28 +648,28 @@ def test_encoder_spin_left(mocker, dock):
     from krux.input import Input, RELEASED, BUTTON_PAGE_PREV
 
     input = Input()
-    mocker.patch.object(input.enter, "value", new=lambda: RELEASED)
+    mocker.patch.object(input.enter, "value", return_value=RELEASED)
 
     def spin():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=0)
 
         # Here it will change direction to Left
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
+        mocker.patch.object(time, "ticks_ms", return_value=100)
         krux.rotary.encoder.process((1, 0))
 
         # Here it will count a PAGE_PREV press
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
+        mocker.patch.object(time, "ticks_ms", return_value=200)
         krux.rotary.encoder.process((1, 1))
 
         # Keep spining through all modes
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 300)
+        mocker.patch.object(time, "ticks_ms", return_value=300)
         krux.rotary.encoder.process((0, 1))
 
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 400)
+        mocker.patch.object(time, "ticks_ms", return_value=400)
         krux.rotary.encoder.process((0, 0))
 
     t = threading.Thread(target=spin)
@@ -710,23 +682,26 @@ def test_encoder_spin_left(mocker, dock):
     krux.input.wdt.feed.assert_called()
 
 
-def test_enter_button_press_when_buttons_not_active_returns_none(mocker, amigo_tft):
+def test_enter_button_press_when_buttons_not_active(mocker, amigo_tft):
     import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED
+    from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
     input = Input()
     input = reset_input_states(mocker, input)
     input.buttons_active = False
 
     def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=0)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "enter_value", new=lambda: PRESSED)
+        mocker.patch.object(time, "ticks_ms", return_value=100)
+        mocker.patch.object(input, "enter_event", return_value=True)
+        mocker.patch.object(input, "enter_value", return_value=PRESSED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input, "enter_value", new=lambda: RELEASED)
+        mocker.patch.object(time, "ticks_ms", return_value=200)
+        mocker.patch.object(input, "enter_event", return_value=False)
+        time.sleep(0.1)
+        mocker.patch.object(input, "enter_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
@@ -736,28 +711,30 @@ def test_enter_button_press_when_buttons_not_active_returns_none(mocker, amigo_t
     t.join()
 
     assert input.buttons_active
-    assert btn is None
+    assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
 
-def test_page_button_press_when_buttons_not_active_returns_none(mocker, amigo_tft):
+def test_page_button_press_when_buttons_not_active(mocker, amigo_tft):
     import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED
+    from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
     input = Input()
     input = reset_input_states(mocker, input)
     input.buttons_active = False
 
     def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=0)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "page_value", new=lambda: PRESSED)
+        mocker.patch.object(time, "ticks_ms", return_value=100)
+        mocker.patch.object(input, "page_event", return_value=True)
+        mocker.patch.object(input, "page_value", return_value=PRESSED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input, "page_value", new=lambda: RELEASED)
+        mocker.patch.object(time, "ticks_ms", return_value=200)
+        mocker.patch.object(input, "page_event", return_value=False)
+        mocker.patch.object(input, "page_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
@@ -767,28 +744,30 @@ def test_page_button_press_when_buttons_not_active_returns_none(mocker, amigo_tf
     t.join()
 
     assert input.buttons_active
-    assert btn is None
+    assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()
 
 
-def test_page_prev_button_press_when_buttons_not_active_returns_none(mocker, amigo_tft):
+def test_page_prev_button_press_when_buttons_not_active(mocker, amigo_tft):
     import threading
     import krux
-    from krux.input import Input, RELEASED, PRESSED
+    from krux.input import Input, RELEASED, PRESSED, ACTIVATING_BUTTONS
 
     input = Input()
     input = reset_input_states(mocker, input)
     input.buttons_active = False
 
     def release():
-        mocker.patch.object(time, "ticks_ms", new=lambda: 0)
+        mocker.patch.object(time, "ticks_ms", return_value=0)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 100)
-        mocker.patch.object(input, "page_prev_value", new=lambda: PRESSED)
+        mocker.patch.object(time, "ticks_ms", return_value=100)
+        mocker.patch.object(input, "page_prev_event", return_value=True)
+        mocker.patch.object(input, "page_prev_value", return_value=PRESSED)
         time.sleep(0.1)
-        mocker.patch.object(time, "ticks_ms", new=lambda: 200)
-        mocker.patch.object(input, "page_prev_value", new=lambda: RELEASED)
+        mocker.patch.object(time, "ticks_ms", return_value=200)
+        mocker.patch.object(input, "page_prev_event", return_value=False)
+        mocker.patch.object(input, "page_prev_value", return_value=RELEASED)
 
     assert input.entropy == 0
 
@@ -798,6 +777,6 @@ def test_page_prev_button_press_when_buttons_not_active_returns_none(mocker, ami
     t.join()
 
     assert input.buttons_active
-    assert btn is None
+    assert btn is ACTIVATING_BUTTONS
     assert input.entropy > 0
     krux.input.wdt.feed.assert_called()

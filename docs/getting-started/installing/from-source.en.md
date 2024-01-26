@@ -62,20 +62,11 @@ If the flashing fails try one of the following common solutions:
   sudo usermod -a -G vboxusers yourusername
   ```
 - If the flashing process fails midway through, check the connection, restart the device, and try the command again.
-- If it continues to fail midway through, you can try using an alternative method of flashing with `kflash` if you're using a Linux machine. To install klash:
-  ```bash
-  pip3 install kflash
-  ```
-  Then you can flash the device:
-  ```bash
-  kflash -p /dev/ttyUSB1 -b 1500000 -B goE build/firmware.bin
-  ```
-  If you get a `Greeting fail, check serial port` error, try replacing `/dev/ttyUSB1` with `/dev/ttyUSB0` in the `kflash` command above.
 
 When the flashing process completes, you should see the Krux logo:
 
-<img src="../../../img/maixpy_m5stickv/logo-125.png">
 <img src="../../../img/maixpy_amigo_tft/logo-150.png">
+<img src="../../../img/maixpy_m5stickv/logo-125.png">
 
 If after 30 seconds you still see a black screen, try power cycling the device by holding down the power button for six seconds.
 

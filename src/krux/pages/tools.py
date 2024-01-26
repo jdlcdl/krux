@@ -49,9 +49,10 @@ class Tools(Page):
                 ctx,
                 [
                     (t("Check SD Card"), self.sd_check),
-                    (t("Delete Mnemonic"), self.del_stored_mnemonic),
                     (t("Print Test QR"), self.print_test),
                     (t("Create QR Code"), self.create_qr),
+                    (t("Delete Mnemonic"), self.del_stored_mnemonic),
+                    (t("Wipe Device"), self.wipe_device),
                     (t("Back"), lambda: MENU_EXIT),
                 ],
             ),
@@ -97,7 +98,7 @@ class Tools(Page):
                         select_file_handler=file_manager.show_file_details
                     )
         except OSError:
-            self.ctx.display.flash_text(t("SD card not detected"), theme.error_color)
+            self.flash_text(t("SD card not detected"), theme.error_color)
 
         return MENU_CONTINUE
 
@@ -111,6 +112,33 @@ class Tools(Page):
             if ret == MENU_CONTINUE:
                 del encrypted_mnemonics
                 return ret
+
+    def erase_spiffs(self):
+        """Erase all SPIFFS, removing all saved configs and mnemonics"""
+
+        import flash
+        from ..firmware import FLASH_SIZE, SPIFFS_ADDR, ERASE_BLOCK_SIZE
+
+        empty_buf = b"\xff" * ERASE_BLOCK_SIZE
+        for address in range(SPIFFS_ADDR, FLASH_SIZE, ERASE_BLOCK_SIZE):
+            if flash.read(address, ERASE_BLOCK_SIZE) == empty_buf:
+                continue
+            flash.erase(address, ERASE_BLOCK_SIZE)
+
+    def wipe_device(self):
+        """Fully formats SPIFFS memory"""
+        self.ctx.display.clear()
+        if self.prompt(
+            t(
+                "Permanently remove all stored encrypted mnemonics and settings from flash?"
+            ),
+            self.ctx.display.height() // 2,
+        ):
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Wiping Device.."))
+            self.erase_spiffs()
+            # Reboot so default settings take place and SPIFFS is formatted.
+            self.ctx.power_manager.reboot()
 
     def print_test(self):
         """Handler for the 'Print Test QR' menu item"""
@@ -138,5 +166,5 @@ class Tools(Page):
 
             title = t("Custom QR Code")
             seed_qr_view = SeedQRView(self.ctx, data=text, title=title)
-            return seed_qr_view.display_seed_qr()
+            return seed_qr_view.display_qr(allow_export=True)
         return MENU_CONTINUE

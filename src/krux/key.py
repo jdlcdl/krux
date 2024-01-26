@@ -74,19 +74,36 @@ class Key:
 
     def fingerprint_hex_str(self, pretty=False):
         """Returns the master key fingerprint in hex format"""
-        formatted_txt = t("Fingerprint: %s") if pretty else "%s"
+        formatted_txt = t("⊚ %s") if pretty else "%s"
         return formatted_txt % hexlify(self.fingerprint).decode("utf-8")
 
     def derivation_str(self, pretty=False):
         """Returns the derivation path for the Hierarchical Deterministic Wallet to
         be displayed as string
         """
-        formatted_txt = t("Derivation: %s") if pretty else "%s"
+        formatted_txt = t("↳ %s") if pretty else "%s"
         return (formatted_txt % self.derivation).replace("h", HARDENED_STR_REPLACE)
 
     def sign(self, message_hash):
         """Signs a message with the extended master private key"""
         return self.root.derive(self.derivation).sign(message_hash)
+
+    def sign_at(self, derivation, message_hash):
+        """Signs a message at an adress derived from master key (code adapted from specterDIY)"""
+        from embit import ec
+        from embit.util import secp256k1
+
+        prv = self.root.derive(derivation).key
+        sig = secp256k1.ecdsa_sign_recoverable(
+            message_hash, prv._secret  # pylint: disable=W0212
+        )
+        flag = sig[64]
+        flag = bytes([27 + flag + 4])
+        ec_signature = ec.Signature(sig[:64])
+        ser = flag + secp256k1.ecdsa_signature_serialize_compact(
+            ec_signature._sig  # pylint: disable=W0212
+        )
+        return ser
 
     @staticmethod
     def pick_final_word(entropy, words):
@@ -113,6 +130,6 @@ class Key:
         """Return the Krux default derivation path for single-sig or multisig to
         be displayd as string
         """
-        return Key.get_default_derivation(multisig, network).replace(
+        return "↳ " + Key.get_default_derivation(multisig, network).replace(
             "h", HARDENED_STR_REPLACE
         )

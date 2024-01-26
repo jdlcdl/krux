@@ -60,6 +60,7 @@ def test_delete_mnemonic_from_flash(m5stickv, mocker):
     BTN_SEQUENCE = [
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -89,9 +90,9 @@ def test_sd_check_no_sd(m5stickv, mocker):
     ctx = mock_context(mocker)
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=BTN_SEQUENCE)
     tool = Tools(ctx)
+    tool.flash_text = mocker.MagicMock()
     tool.sd_check()
-
-    ctx.display.flash_text.assert_has_calls([mocker.call("SD card not detected", ANY)])
+    tool.flash_text.assert_has_calls([mocker.call("SD card not detected", ANY)])
 
 
 def test_sd_check(m5stickv, mocker, mock_file_operations):
@@ -125,6 +126,7 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         BUTTON_PAGE,
         BUTTON_ENTER,  # Select first mnemonic
         BUTTON_ENTER,  # Confirm deletion
+        BUTTON_ENTER,  # Read remove message
         BUTTON_PAGE_PREV,  # Go to Back
         BUTTON_ENTER,  # Leave
     ]
@@ -136,4 +138,5 @@ def test_delete_mnemonic_from_sd(m5stickv, mocker, mock_file_operations):
         tool.del_stored_mnemonic()
     # First mnemonic in the list (ECB) will be deleted
     # Assert only CBC remains
-    m().write.assert_called_once_with(CBC_ONLY_JSON)
+    padding_size = len(SEEDS_JSON) - len(CBC_ONLY_JSON)
+    m().write.assert_called_once_with(CBC_ONLY_JSON + " " * padding_size)

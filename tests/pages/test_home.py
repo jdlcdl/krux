@@ -87,14 +87,15 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
     ctx = mock_context(mocker)
     ctx.power_manager.battery_charge_remaining.return_value = 1
     ctx.input.wait_for_button = mocker.MagicMock(side_effect=btn_seq)
+    ctx.display.max_menu_lines = mocker.MagicMock(return_value=7)
 
     ctx.wallet = wallet
     ctx.printer = printer
     if printer is None:
-        Settings().printer.driver = "none"
+        Settings().hardware.printer.driver = "none"
     else:
         mocker.patch("krux.printers.create_printer", new=mocker.MagicMock())
-        Settings().printer.driver = THERMAL_ADAFRUIT_TXT
+        Settings().hardware.printer.driver = THERMAL_ADAFRUIT_TXT
 
     if touch_seq:
         ctx.input.touch = mocker.MagicMock(
@@ -104,7 +105,7 @@ def create_ctx(mocker, btn_seq, wallet=None, printer=None, touch_seq=None):
 
 
 def test_mnemonic_words(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -152,17 +153,19 @@ def test_mnemonic_words(mocker, m5stickv, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_mnemonic")
-        home.mnemonic()
+        mocker.spy(mnemonics, "display_mnemonic")
+        mnemonics.mnemonic()
 
-        home.display_mnemonic.assert_called_with(ctx.wallet.key.mnemonic)
+        mnemonics.display_mnemonic.assert_called_with(
+            ctx.wallet.key.mnemonic, "Mnemonic"
+        )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -174,9 +177,11 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             None,  # printer
             [
                 BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,  # select Plaintext QR
+                BUTTON_ENTER,  # click
                 BUTTON_ENTER,
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -186,9 +191,11 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             None,  # printer
             [
                 BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,  # select Plaintext QR
+                BUTTON_ENTER,  # click
                 BUTTON_ENTER,
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -199,10 +206,12 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,  # select Plaintext QR
+                BUTTON_ENTER,  # click
                 BUTTON_ENTER,
                 BUTTON_ENTER,
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -212,10 +221,12 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,  # select Plaintext QR
+                BUTTON_ENTER,  # click
                 BUTTON_ENTER,
                 BUTTON_ENTER,
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -226,10 +237,12 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,  # select Plaintext QR
+                BUTTON_ENTER,  # click
                 BUTTON_ENTER,
                 BUTTON_PAGE,
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -239,10 +252,12 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
             MockPrinter(),
             [
                 BUTTON_PAGE,
-                BUTTON_ENTER,
+                BUTTON_PAGE,  # select Plaintext QR
+                BUTTON_ENTER,  # click
                 BUTTON_ENTER,
                 BUTTON_PAGE,
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
@@ -253,122 +268,163 @@ def test_mnemonic_standard_qr(mocker, m5stickv, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
-        home.mnemonic()
+        mocker.spy(mnemonics, "display_qr_codes")
+        mocker.spy(mnemonics.utils, "print_standard_qr")
+        mnemonics.mnemonic()
 
         title = "Plaintext QR"
-        home.display_qr_codes.assert_called_with(
+        mnemonics.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
-            home.print_standard_qr.assert_called_with(
+            mnemonics.utils.print_standard_qr.assert_called_with(
                 ctx.wallet.key.mnemonic, FORMAT_NONE, title
             )
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # No print prompt
+        # 0 - 12W
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,  # Select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE_PREV,  # Move to leave QR Viewer
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
+        # 1 - 24W
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             None,
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,  # Select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
-                BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE_PREV,  # Move to leave QR Viewer
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # Print
+        # 2 - 12W Print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_ENTER,  # Print confirm
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_ENTER,  # say yes to print prompt
+                BUTTON_PAGE_PREV,  # Move to leave QR Viewer
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
+        # 3 - 24W Print
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_ENTER,  # Print confirm
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_ENTER,  # say yes to print prompt
+                BUTTON_PAGE_PREV,  # Move to leave QR Viewer
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
-        # Decline to print
+        # 4 - 12W Print, Decline to print
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_PAGE,  # Print decline
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_PAGE,  # say no to print prompt
+                BUTTON_PAGE_PREV,  # Move to leave QR Viewer
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
         ),
+        # 5 - 24W Print, Decline to print
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
             MockPrinter(),
             [
                 BUTTON_PAGE,
                 BUTTON_PAGE,
+                BUTTON_PAGE,  # select Compact SeedQR
                 BUTTON_ENTER,  # Open Compact SeedQR
+                BUTTON_ENTER,  # Open QR Menu
+                BUTTON_PAGE,
+                BUTTON_PAGE,
+                BUTTON_PAGE,  # Move to Print
+                BUTTON_ENTER,  # Print
+                BUTTON_PAGE,  # Print decline
                 BUTTON_ENTER,  # Leave
-                BUTTON_ENTER,  # Are you sure? yes
-                BUTTON_PAGE,  # say no to print prompt
+                BUTTON_PAGE_PREV,  # Move to leave QR Viewer
+                BUTTON_ENTER,  # Leave QR Viewer
                 BUTTON_PAGE_PREV,  # change to btn Back
+                BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
@@ -380,21 +436,23 @@ def test_mnemonic_compact_qr(mocker, m5stickv, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_seed_qr")
-        home.mnemonic()
+        mocker.spy(mnemonics, "display_seed_qr")
+        mnemonics.mnemonic()
 
-        home.display_seed_qr.assert_called_once()
+        mnemonics.display_seed_qr.assert_called_once()
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
 
 def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
-    from krux.pages.home import Home
+    from krux.pages.mnemonic_view import MnemonicsView
     from krux.wallet import Wallet
     from krux.input import BUTTON_TOUCH, BUTTON_PAGE_PREV, BUTTON_ENTER
     from krux.qr import FORMAT_NONE
+
+    position = [2, 0]
 
     cases = [
         # No print prompt
@@ -406,9 +464,10 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
                 BUTTON_TOUCH,
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
-            [1, 0],
+            position,
         ),
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
@@ -418,9 +477,10 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
                 BUTTON_TOUCH,
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
-            [1, 0],
+            position,
         ),
         # Print
         (
@@ -432,9 +492,10 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
                 BUTTON_TOUCH,
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
-            [1, 0, 0],
+            position + [0],
         ),
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
@@ -445,9 +506,10 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
                 BUTTON_TOUCH,
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
-            [1, 0, 0],
+            position + [0],
         ),
         # Decline to print
         (
@@ -459,9 +521,10 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
                 BUTTON_TOUCH,
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
-            [1, 0, 1],
+            position + [1],
         ),
         (
             Wallet(tdata.SINGLESIG_24_WORD_KEY),
@@ -472,9 +535,10 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
                 BUTTON_TOUCH,
                 BUTTON_PAGE_PREV,  # change to btn Back
                 BUTTON_PAGE_PREV,
+                BUTTON_PAGE_PREV,
                 BUTTON_ENTER,  # click on back to return to home init screen
             ],
-            [1, 0, 1],
+            position + [1],
         ),
     ]
     num = 0
@@ -482,19 +546,19 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
         print(num)
         num = num + 1
         ctx = create_ctx(mocker, case[2], case[0], case[1], touch_seq=case[3])
-        home = Home(ctx)
+        mnemonics = MnemonicsView(ctx)
 
-        mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(mnemonics, "display_qr_codes")
+        mocker.spy(mnemonics.utils, "print_standard_qr")
 
-        home.mnemonic()
+        mnemonics.mnemonic()
 
         title = "Plaintext QR"
-        home.display_qr_codes.assert_called_with(
+        mnemonics.display_qr_codes.assert_called_with(
             ctx.wallet.key.mnemonic, FORMAT_NONE, title
         )
         if case[1] is not None:
-            home.print_standard_qr.assert_called_with(
+            mnemonics.utils.print_standard_qr.assert_called_with(
                 ctx.wallet.key.mnemonic, FORMAT_NONE, title
             )
 
@@ -502,107 +566,119 @@ def test_mnemonic_st_qr_touch(mocker, amigo_tft, tdata):
 
 
 def test_public_key(mocker, m5stickv, tdata):
-    from krux.pages.home import Home
+    from krux.pages.pub_key_view import PubkeyView
     from krux.wallet import Wallet
-    from krux.input import BUTTON_ENTER, BUTTON_PAGE
+    from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
 
     cases = [
-        # No print prompt
+        # Case parameters: [Wallet, Printer, Button Sequence, Show XPUB, Show ZPUB]
+        # 0 - Singlesig - Show all text and QR codes
         (
             Wallet(tdata.SINGLESIG_12_WORD_KEY),
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
+            [
+                BUTTON_ENTER,  # Enter XPUB - Text
+                BUTTON_PAGE,  # move to Back
+                BUTTON_ENTER,  # Press Back
+                BUTTON_PAGE,  # move to XPUB - QR Code
+                BUTTON_ENTER,  # Enter XPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE,  # move to XPUB - QR Code
+                BUTTON_PAGE,  # move to ZPUB - Text
+                BUTTON_PAGE,  # move to ZPUB - QR Code
+                BUTTON_ENTER,  # Enter ZPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE_PREV,  # Move Back
+                BUTTON_ENTER,  # Press Back to leave
+            ],
+            True,
+            True,
         ),
+        # 1 - Multisig - Show all text and QR codes
         (
             Wallet(tdata.MULTISIG_12_WORD_KEY),
             None,
-            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
-        ),
-        # Print
-        (
-            Wallet(tdata.SINGLESIG_12_WORD_KEY),
-            MockPrinter(),
             [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
+                BUTTON_ENTER,  # Enter XPUB - Text
+                BUTTON_PAGE,  # move to Back
+                BUTTON_ENTER,  # Press Back
+                BUTTON_PAGE,  # move to XPUB - QR Code
+                BUTTON_ENTER,  # Enter XPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE,  # move to XPUB - QR Code
+                BUTTON_PAGE,  # move to ZPUB - Text
+                BUTTON_PAGE,  # move to ZPUB - QR Code
+                BUTTON_ENTER,  # Enter ZPUB - QR Code
+                BUTTON_ENTER,  # Enter QR Menu
+                BUTTON_PAGE_PREV,  # move to Back to Menu
+                BUTTON_ENTER,  # Press Back to Menu
+                BUTTON_PAGE_PREV,  # Move Back
+                BUTTON_ENTER,  # Press Back to leave
             ],
+            True,
+            True,
         ),
-        (
-            Wallet(tdata.MULTISIG_12_WORD_KEY),
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-            ],
-        ),
-        # Decline to print
-        (
-            Wallet(tdata.SINGLESIG_12_WORD_KEY),
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-            ],
-        ),
-        (
-            Wallet(tdata.MULTISIG_12_WORD_KEY),
-            MockPrinter(),
-            [
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-                BUTTON_ENTER,
-                BUTTON_ENTER,
-                BUTTON_PAGE,
-            ],
-        ),
+        # TODO: Create cases were not all text and QR codes are shown
     ]
+    num = 0
+
     for case in cases:
+        print(num)
+        num += 1
+        mock_seed_qr_view = mocker.patch(
+            "krux.pages.qr_view.SeedQRView"
+        )  # Mock SeedQRView
         ctx = create_ctx(mocker, case[2], case[0], case[1])
-        home = Home(ctx)
+        pub_key_viewer = PubkeyView(ctx)
 
-        mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
-
-        home.public_key()
+        pub_key_viewer.public_key()
 
         version = "Zpub" if ctx.wallet.key.multisig else "zpub"
-        display_qr_calls = [
-            mocker.call(
-                ctx.wallet.key.key_expression(None),
-                FORMAT_NONE,
-                "XPUB",
-            ),
-            mocker.call(
-                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
-                FORMAT_NONE,
-                "ZPUB",
-            ),
-        ]
-        print_qr_calls = [
-            mocker.call(ctx.wallet.key.key_expression(None), FORMAT_NONE, "XPUB"),
-            mocker.call(
-                ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
-                FORMAT_NONE,
-                "ZPUB",
-            ),
-        ]
-        home.display_qr_codes.assert_has_calls(display_qr_calls)
-        if case[1] is not None:
-            home.print_standard_qr.assert_has_calls(print_qr_calls)
+        qr_view_calls = []
+        print_qr_calls = []
+
+        if case[3]:  # Show XPUB
+            qr_view_calls.append(
+                mocker.call(
+                    ctx,
+                    data=ctx.wallet.key.key_expression(None),
+                    title="XPUB",
+                ),
+            )
+            print_qr_calls.append(
+                mocker.call(
+                    ctx.wallet.key.key_expression(None),
+                    FORMAT_NONE,
+                    "XPUB",
+                ),
+            )
+        if case[4]:  # Show ZPUB
+            qr_view_calls.append(
+                mocker.call(
+                    ctx,
+                    data=ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                    title="ZPUB",
+                ),
+            )
+            print_qr_calls.append(
+                mocker.call(
+                    ctx.wallet.key.key_expression(ctx.wallet.key.network[version]),
+                    FORMAT_NONE,
+                    "ZPUB",
+                ),
+            )
+
+        # Assert SeedQRView was initialized with the correct parameters
+        mock_seed_qr_view.assert_has_calls(qr_view_calls, any_order=True)
+
+        # TODO: Assert XPUB and ZPUB text was displayed
 
         assert ctx.input.wait_for_button.call_count == len(case[2])
 
@@ -614,7 +690,7 @@ def test_wallet(mocker, m5stickv, tdata):
     from krux.qr import FORMAT_PMOFN
 
     cases = [
-        # Don't load
+        # 0 Don't load
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -622,7 +698,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_PAGE],
         ),
-        # Load, good data, accept
+        # 1 Load, good data, accept
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -630,7 +706,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # Load, good data, decline
+        # 2 Load, good data, decline
         (
             False,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -638,11 +714,11 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
-        # Load, bad capture
+        # 3 Load, bad capture
         (False, tdata.SINGLESIG_12_WORD_KEY, None, None, [BUTTON_ENTER]),
-        # Load, bad wallet data
+        # 4 Load, bad wallet data
         (False, tdata.SINGLESIG_12_WORD_KEY, "{}", None, [BUTTON_ENTER, BUTTON_ENTER]),
-        # No print prompt
+        # 5 No print prompt
         (
             True,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -650,7 +726,7 @@ def test_wallet(mocker, m5stickv, tdata):
             None,
             [BUTTON_ENTER],
         ),
-        # Print
+        # 6 Print
         (
             True,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -658,7 +734,7 @@ def test_wallet(mocker, m5stickv, tdata):
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_ENTER],
         ),
-        # Decline to print
+        # 7 Decline to print
         (
             True,
             tdata.SINGLESIG_12_WORD_KEY,
@@ -666,16 +742,20 @@ def test_wallet(mocker, m5stickv, tdata):
             MockPrinter(),
             [BUTTON_ENTER, BUTTON_PAGE],
         ),
-        # Multisig wallet, no print prompt
+        # 8 Multisig wallet, no print prompt
         (
             True,
             tdata.MULTISIG_12_WORD_KEY,
             tdata.SPECTER_MULTISIG_WALLET_DATA,
             None,
-            [BUTTON_ENTER],
+            [BUTTON_ENTER, BUTTON_ENTER, BUTTON_ENTER],
         ),
     ]
+
+    num = 0
     for case in cases:
+        print("case: %d" % num)
+        num = num + 1
         wallet = Wallet(case[1])
         if case[0]:
             wallet.load(case[2], FORMAT_PMOFN)
@@ -690,7 +770,7 @@ def test_wallet(mocker, m5stickv, tdata):
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_wallet")
 
@@ -698,7 +778,7 @@ def test_wallet(mocker, m5stickv, tdata):
 
         if case[0]:
             home.display_wallet.assert_called_once()
-            home.print_standard_qr.assert_called_once()
+            home.utils.print_standard_qr.assert_called_once()
         else:
             if case[4][0] == BUTTON_ENTER:
                 home.capture_qr_code.assert_called_once()
@@ -993,7 +1073,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
         )
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
         # case SD available
         if case[10] is not None:
             mocker.patch("os.listdir", new=mocker.MagicMock(return_value=["test.psbt"]))
@@ -1020,7 +1100,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
                     home.capture_qr_code.assert_called_once()
                 if case[5]:  # signed!
                     home.display_qr_codes.assert_called_once()
-                    home.print_standard_qr.assert_called_once()
+                    home.utils.print_standard_qr.assert_called_once()
                 else:
                     home.display_qr_codes.assert_not_called()
             else:
@@ -1031,7 +1111,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
 def test_sign_message(mocker, m5stickv, tdata):
     import binascii
-    from krux.pages.home import Home
+    from krux.pages.sign_message_ui import SignMessage
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -1165,14 +1245,14 @@ def test_sign_message(mocker, m5stickv, tdata):
         wallet = Wallet(tdata.SINGLESIG_SIGNING_KEY)
 
         ctx = create_ctx(mocker, case[3], wallet, case[2])
-        home = Home(ctx)
+        home = SignMessage(ctx)
         mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
         mocker.patch.object(
             home,
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "print_standard_qr")
+        mocker.spy(home.utils, "print_standard_qr")
         mocker.spy(home, "capture_qr_code")
         mocker.spy(home, "display_qr_codes")
         if case[6] is not None:
@@ -1199,7 +1279,7 @@ def test_sign_message(mocker, m5stickv, tdata):
                     mocker.call(case[5], case[1], "Hex Public Key"),
                 ]
             )
-            home.print_standard_qr.assert_has_calls(
+            home.utils.print_standard_qr.assert_has_calls(
                 [
                     mocker.call(case[4], case[1], "Signed Message"),
                     mocker.call(case[5], case[1], "Hex Public Key"),
@@ -1207,6 +1287,6 @@ def test_sign_message(mocker, m5stickv, tdata):
             )
         else:
             home.display_qr_codes.assert_not_called()
-            home.print_standard_qr.assert_not_called()
+            home.utils.print_standard_qr.assert_not_called()
 
         assert ctx.input.wait_for_button.call_count == len(case[3])
