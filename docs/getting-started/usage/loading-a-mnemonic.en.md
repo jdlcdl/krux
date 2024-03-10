@@ -18,8 +18,8 @@ You can choose to use the camera to scan a `QR code` or `Tiny Seed` metal plate 
 It's unpleasant having to manually enter 12 or 24 words every time you want to use Krux. To remedy this you can instead use the device's camera to read a QR code containing the words. Krux will decode QR codes of four types:
 
 1. **Plain text QR**: The mnemonic words encoded as text, with words separated by spaces.
-2. [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the mnemonic words of the respective BIP-39 numbers concatenated, encoded as text.
-3. [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the mnemonic words bits concatenated as bytes.
+2. [SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md): Basically, it is the BIP-39 mnemonic word indexes (0 - 2047) in 4-digits decimal each, concatenated, encoded as text.
+3. [Compact SeedQR](https://github.com/SeedSigner/seedsigner/blob/dev/docs/seed_qr/README.md/#compactseedqr-specification): Basically, it is the BIP-39 mnemonic word indexes (0 - 2047) as 11-bits each, concatenated as bytes (big-endian, without the last-word checksum bits).
 4. [Encrypted Mnemonic](../features/encrypted-mnemonics.md): A specification created by Krux that encrypts the mnemonic words bits and adds some information about the encryption used.
 
 After opening your wallet via one of the manual methods you can use Krux to create QR codes of all types above, transcript them to paper or metal using the transcription helpers or attach a thermal printer to your Krux and print out the mnemonic. Check out the [Printing section](../features/printing.md) for more information.
@@ -27,14 +27,14 @@ You can also use [an offline QR code generator for this](https://iancoleman.io/b
 
 #### Tiny Seed
 
-[Tiny Seed](https://tinyseed.io/) is a compact metal plate mnemonic backup method.
+[Tiny Seed](https://tinyseed.io/) is a compact metal plate BIP-39 mnemonic backup method.
 Krux devices have machine vision capabilities that allow users to scan these metal plates and instantly load mnemonics engraved on them. To properly scan them place the Tiny Seed over a black background and paint the punched bits black to increase contrast.
 
 ### Via Manual Input
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-manual-options-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-manual-options-150.png" align="right">
 
-Manually type `Words`, `Word Numbers`, `Tiny Seed` (toggle the bits or punches) or [`Stackbit`](https://stackbit.me) (model 1248 metal plate backup).
+Manually type `Words`, `Word Numbers` (1 - 2048), `Tiny Seed` (toggle the bits or punches) or [`Stackbit`](https://stackbit.me) (model 1248 metal plate backup).
 
 <div style="clear: both"></div>
 
@@ -67,7 +67,7 @@ On your 12th or 24th word, you can leave the word blank to have Krux generate th
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-tinyseed-filled-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-tinyseed-filled-150.png" align="right">
 
-Enter each word of your BIP-39 mnemonic words in their binary form, toggling necessary bits to recreate each of the word's respective number. Last word will have checksum bits dynamically toggled while you fill previous bits.
+Enter each word number (1 - 2048) of your BIP-39 mnemonic words in their binary form, toggling necessary bits to recreate each of the word's respective number. Last word will have checksum bits dynamically toggled while you fill previous bits.
 
 <div style="clear: both"></div>
 
@@ -75,7 +75,7 @@ Enter each word of your BIP-39 mnemonic words in their binary form, toggling nec
 <img src="../../../img/maixpy_m5stickv/load-mnemonic-via-stackbit-filled-125.png" align="right">
 <img src="../../../img/maixpy_amigo/load-mnemonic-via-stackbit-filled-150.png" align="right">
 
-Enter mnemonic BIP-39 word's numbers using Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8. For example, to enter the word "pear", number 1297, you have to punch (1)(2)(1+8=9)(1+2+4=7)
+Enter mnemonic BIP-39 word numbers (1 - 2048) using Stackbit 1248 metal plate backup method, where each of the four digits of the word's number is a sum of marked (punched) numbers 1,2,4 and 8. For example, to enter the word "pear", number 1297, you have to punch (1)(2)(1+8=9)(1+2+4=7)
 
 <div style="clear: both"></div>
 
