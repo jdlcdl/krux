@@ -150,6 +150,7 @@ class FileManager(Page):
         """Display the file details on the device's screen"""
         import uos
         import time
+        import binascii
 
         stats = uos.stat(file)
         size_KB = stats[6] / 1024
@@ -157,6 +158,7 @@ class FileManager(Page):
         created = time.localtime(stats[9])
         modified = time.localtime(stats[8])
         format_datetime = " %s-%02d-%02d %02d:%02d"
+        sha256_digest = binascii.hexlify(SDHandler.sha256(file)).decode()
         file = file[4:]  # remove "/sd/" prefix
 
         self.ctx.display.clear()
@@ -175,6 +177,9 @@ class FileManager(Page):
             + "\n\n"
             + t("Modified:")
             + format_datetime % modified[:5]
+            + "\n\n"
+            + "SHA256: "
+            + sha256_digest
         )
 
         return file

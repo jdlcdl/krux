@@ -16,6 +16,9 @@ def test_load_file(m5stickv, mocker, mock_file_operations):
             "krux.sd_card.SDHandler.dir_exists",
             mocker.MagicMock(side_effect=[True, False]),
         )
+        mocker.patch(
+            "builtins.open", mocker.mock_open(read_data=SEEDS_JSON.encode())
+        )  # bytes to be hashed
         ctx = create_ctx(mocker, BTN_SEQUENCE)
         utils = Utils(ctx)
         file_name, data = utils.load_file(
@@ -27,7 +30,7 @@ def test_load_file(m5stickv, mocker, mock_file_operations):
         if only_get_filename:
             assert data is None
         else:
-            assert data == SEEDS_JSON
+            assert data == SEEDS_JSON.encode()
 
 
 def test_load_file_with_no_sd(m5stickv, mocker):

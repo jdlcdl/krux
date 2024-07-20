@@ -41,7 +41,7 @@ def test_file_exploring(m5stickv, mocker, mock_file_operations):
     ctx.display.draw_hcentered_text.assert_has_calls(
         [
             mocker.call(
-                "second_file\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00"
+                "second_file\n\nSize: 1.1 KB\n\nCreated: 1970-01-01 00:00\n\nModified: 1970-01-01 00:00\n\nSHA256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
             )
         ]
     )
