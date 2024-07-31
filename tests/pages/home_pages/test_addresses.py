@@ -17,6 +17,7 @@ def test_multisig_addresses_without_descriptor(mocker, m5stickv, tdata):
 
 def test_scan_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -255,14 +256,14 @@ def test_scan_address(mocker, m5stickv, tdata):
         addresses_ui = Addresses(ctx)
 
         mocker.patch.object(
-            addresses_ui, "capture_qr_code", new=lambda: (case[3], FORMAT_NONE)
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[3], FORMAT_NONE)
         )
         mocker.spy(addresses_ui, "show_address")
-        mocker.spy(addresses_ui, "capture_qr_code")
+        mocker.spy(QRCodeCapture, "qr_capture_loop")
 
         addresses_ui.scan_address()
 
-        addresses_ui.capture_qr_code.assert_called_once()
+        QRCodeCapture.qr_capture_loop.assert_called_once()
         if case[4]:  # If address is valid
             addresses_ui.show_address.assert_called_once()
             can_search = (
@@ -288,6 +289,7 @@ def test_scan_address(mocker, m5stickv, tdata):
 
 def test_scan_change_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.addresses import Addresses
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -325,14 +327,14 @@ def test_scan_change_address(mocker, m5stickv, tdata):
         ctx = create_ctx(mocker, case[5], wallet, None)
         addresses_ui = Addresses(ctx)
         mocker.patch.object(
-            addresses_ui, "capture_qr_code", new=lambda: (case[3], FORMAT_NONE)
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[3], FORMAT_NONE)
         )
         mocker.spy(addresses_ui, "show_address")
-        mocker.spy(addresses_ui, "capture_qr_code")
+        mocker.spy(QRCodeCapture, "qr_capture_loop")
 
         addresses_ui.scan_address(1)  # Change addresses
 
-        addresses_ui.capture_qr_code.assert_called_once()
+        QRCodeCapture.qr_capture_loop.assert_called_once()
         if case[4]:  # If address is valid
             addresses_ui.show_address.assert_called_once()
             can_search = (

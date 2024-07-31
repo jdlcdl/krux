@@ -6,6 +6,7 @@ from .test_home import tdata
 def test_sign_message(mocker, m5stickv, tdata):
     import binascii
     from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE, BUTTON_PAGE_PREV
     from krux.qr import FORMAT_NONE
@@ -179,13 +180,15 @@ def test_sign_message(mocker, m5stickv, tdata):
 
         ctx = create_ctx(mocker, case[3], wallet, case[2])
         home = SignMessage(ctx)
-        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[0], case[1]))
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[0], case[1])
+        )
         mocker.patch.object(
             home,
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "capture_qr_code")
+        mocker.spy(QRCodeCapture, "qr_capture_loop")
         mocker.spy(home, "display_qr_codes")
         if case[6] is not None:
             mocker.patch("os.listdir", new=mocker.MagicMock(return_value=[]))
@@ -203,7 +206,7 @@ def test_sign_message(mocker, m5stickv, tdata):
 
         home.sign_message()
 
-        home.capture_qr_code.assert_called_once()
+        QRCodeCapture.qr_capture_loop.assert_called_once()
         signed_qr_message = (
             len(case[3]) > 1
             and case[3][0] == BUTTON_ENTER
@@ -224,6 +227,8 @@ def test_sign_message(mocker, m5stickv, tdata):
 
 def test_sign_message_at_address(mocker, m5stickv, tdata):
     from krux.pages.home_pages.sign_message_ui import SignMessage
+    from krux.pages.qr_capture import QRCodeCapture
+    from krux.wallet import Wallet
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_NONE
@@ -242,9 +247,12 @@ def test_sign_message_at_address(mocker, m5stickv, tdata):
     message_signer = SignMessage(ctx)
     mocker.spy(message_signer, "display_qr_codes")
     mocker.patch.object(
-        message_signer,
-        "capture_qr_code",
-        new=lambda: ("signmessage m/84h/1h/0h/0/3 ascii:a test message", FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (
+            "signmessage m/84h/1h/0h/0/3 ascii:a test message",
+            FORMAT_NONE,
+        ),
     )
     message_signer.sign_message()
 

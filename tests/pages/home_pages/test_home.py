@@ -326,6 +326,7 @@ def test_load_sign_message_menu(mocker, amigo):
 
 def test_sign_psbt(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER, BUTTON_PAGE
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -646,13 +647,15 @@ def test_sign_psbt(mocker, m5stickv, tdata):
 
         ctx = create_ctx(mocker, case[7], wallet, case[6])
         home = Home(ctx)
-        mocker.patch.object(home, "capture_qr_code", new=lambda: (case[2], case[3]))
+        mocker.patch.object(
+            QRCodeCapture, "qr_capture_loop", new=lambda self: (case[2], case[3])
+        )
         mocker.patch.object(
             home,
             "display_qr_codes",
             new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
         )
-        mocker.spy(home, "capture_qr_code")
+        mocker.spy(QRCodeCapture, "qr_capture_loop")
         mocker.spy(home, "display_qr_codes")
         if case[6]:
             mock_send_to_printer = mocker.patch(
@@ -690,7 +693,7 @@ def test_sign_psbt(mocker, m5stickv, tdata):
             and case[7][1] == BUTTON_ENTER
         )
         if loaded_via_sd:
-            home.capture_qr_code.assert_not_called()
+            QRCodeCapture.qr_capture_loop.assert_not_called()
 
         if case[4] and case[8] is None:  # if signed from/to QR codes
             home.display_qr_codes.assert_called_once_with(case[5], FORMAT_PMOFN)
@@ -829,6 +832,7 @@ def test_psbt_warnings(mocker, m5stickv, tdata):
 
 def test_sign_wrong_key(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -845,14 +849,16 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home, "capture_qr_code", new=lambda: (tdata.P2WPKH_PSBT_B64, FORMAT_NONE)
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_PSBT_B64, FORMAT_NONE),
     )
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
+    # NotUsed mocker.spy(QRCodeCapture, "qr_capture_loop")
     mocker.spy(home, "display_qr_codes")
 
     # Wrong key, will raise error "cannot sign"
@@ -867,6 +873,7 @@ def test_sign_wrong_key(mocker, m5stickv, tdata):
 
 def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -885,16 +892,16 @@ def test_sign_zeroes_fingerprint(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (tdata.P2WPKH_PSBT_B64_ZEROES_FINGERPRINT, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_PSBT_B64_ZEROES_FINGERPRINT, FORMAT_NONE),
     )
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
+    # NotUsed mocker.spy(QRCodeCapture, "qr_capture_loop")
     mocker.spy(home, "display_qr_codes")
 
     home.sign_psbt()
@@ -983,6 +990,7 @@ def test_sign_p2tr_zeroes_fingerprint(mocker, m5stickv, tdata):
 
 def test_sign_high_fee(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -1000,16 +1008,16 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (tdata.P2WPKH_HIGH_FEE_PSBT, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (tdata.P2WPKH_HIGH_FEE_PSBT, FORMAT_NONE),
     )
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
+    # NotUsed mocker.spy(QRCodeCapture, "qr_capture_loop")
 
     home.sign_psbt()
 
@@ -1029,6 +1037,7 @@ def test_sign_high_fee(mocker, m5stickv, tdata):
 
 def test_sign_self(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -1048,16 +1057,16 @@ def test_sign_self(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (psbt_action_key, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (psbt_action_key, FORMAT_NONE),
     )
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
+    # NotUsed mocker.spy(QRCodeCapture, "qr_capture_loop")
 
     home.sign_psbt()
 
@@ -1077,6 +1086,7 @@ def test_sign_self(mocker, m5stickv, tdata):
 
 def test_sign_spent_and_self(mocker, m5stickv, tdata):
     from krux.pages.home_pages.home import Home
+    from krux.pages.qr_capture import QRCodeCapture
     from krux.wallet import Wallet
     from krux.input import BUTTON_ENTER
     from krux.qr import FORMAT_PMOFN, FORMAT_NONE
@@ -1097,16 +1107,16 @@ def test_sign_spent_and_self(mocker, m5stickv, tdata):
     ctx = create_ctx(mocker, btn_seq, wallet)
     home = Home(ctx)
     mocker.patch.object(
-        home,
-        "capture_qr_code",
-        new=lambda: (psbt_action_key, FORMAT_NONE),
+        QRCodeCapture,
+        "qr_capture_loop",
+        new=lambda self: (psbt_action_key, FORMAT_NONE),
     )
     mocker.patch.object(
         home,
         "display_qr_codes",
         new=lambda data, qr_format, title=None: ctx.input.wait_for_button(),
     )
-    mocker.spy(home, "capture_qr_code")
+    # NotUsed mocker.spy(QRCodeCapture, "qr_capture_loop")
 
     home.sign_psbt()
 
