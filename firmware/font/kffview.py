@@ -2,7 +2,7 @@
 """
 A simple Krux Font Format viewer
 
-Pass it: font_filename.kff to view all fonts,
+Pass it: font_filename.kff and height-in-pixels to view all fonts,
 optionally, pass it also [ one_utf_character ] to see just that glyph
 """
 
@@ -39,11 +39,12 @@ def str_to_bytes(comma_separated_bytes_string):
     return bytes([int(x[2:], 16) for x in bytestr_list])
 
 
-def main(kff_filename, chars=[]):
+def main(kff_filename, height, chars=[]):
     """
-    receives a kff-filename and optionally a string of characters
+    receives a kff-filename, height and optionally a string of characters
     prints all kff bitmap fonts, or those requested, to stdout.
     """
+    height = int(height)
     zero = chr(0x2591) * 2  # display zero bits as two light-shade chars
     one = chr(0x2588) * 2  # display one bits as two full-block chars
 
@@ -54,6 +55,7 @@ def main(kff_filename, chars=[]):
     num_glyphs = int.from_bytes(contents[:2], "big")
     assert (len(contents) - 2) % num_glyphs == 0
     bytes_per_glyph = (len(contents) - 2) // num_glyphs
+    assert (bytes_per_glyph - 2) % height == 0
 
     print(f"{kff_filename} contains {num_glyphs:d} glyphs:")
     for i in range(2, len(contents), bytes_per_glyph):
@@ -66,11 +68,12 @@ def main(kff_filename, chars=[]):
             continue
 
         print(f'\n"{chr(codepoint)}" is unicode: U+{codepoint:04X}, decimal: {codepoint:d}')
-        if len(byte_map) <= 16 or len(byte_map) % 2 != 0:
+        if len(byte_map) == height:
             # one 8 bit column
             for i in range(0, len(bit_map), 8):
                 print("".join(one if x == "1" else zero for x in bit_map[i : i + 8]))
-        elif len(byte_map) == 48:
+
+        elif len(byte_map) == height*2:
             # two 8 bit columns
             half = int(len(bit_map) / 2)
             for i in range(0, half, 8):
@@ -80,7 +83,7 @@ def main(kff_filename, chars=[]):
                         for x in bit_map[i : i + 8] + bit_map[half + i : half + i + 8]
                     )
                 )
-        elif len(byte_map) == 72:
+        elif len(byte_map) == height*3:
             # three 8 bit columns
             third = int(len(bit_map) / 3)
             for i in range(0, third, 8):
@@ -94,7 +97,7 @@ def main(kff_filename, chars=[]):
                         )
                     )
                 )
-        elif len(byte_map) == 96:
+        elif len(byte_map) == height*4:
             # four 8 bit columns
             qtr = int(len(bit_map) / 4)
             for i in range(0, qtr, 8):
