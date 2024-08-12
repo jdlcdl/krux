@@ -5,8 +5,6 @@ import hashlib
 
 from embit.wordlists.bip39 import WORDLIST
 
-WORDINDEX = {word: i for i, word in enumerate(WORDLIST)}
-
 def mnemonic_to_bytes(mnemonic: str, ignore_checksum: bool = False, wordlist=WORDLIST):
     """optimized replacement for embit.bip39.mnemonic_to_bytes() via an integer accumulator"""
     words = mnemonic.strip().split()
@@ -16,10 +14,7 @@ def mnemonic_to_bytes(mnemonic: str, ignore_checksum: bool = False, wordlist=WOR
     accumulator = 0
     for word in words:
         try:
-            if wordlist is WORDLIST:
-                accumulator = (accumulator << 11) + WORDINDEX[word]
-            else:
-                accumulator = (accumulator << 11) + wordlist.index(word)
+            accumulator = (accumulator << 11) + wordlist.index(word)
         except Exception:
             raise ValueError("Word '%s' is not in the dictionary" % word)
 
