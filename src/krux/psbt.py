@@ -61,7 +61,7 @@ class PSBTSigner:
 
         # Parse the PSBT
         if psbt_filename:
-            gc.collect()
+            #gc.collect()
             from .sd_card import SD_PATH
 
             file_path = "/%s/%s" % (SD_PATH, psbt_filename)
@@ -491,7 +491,7 @@ class PSBTSigner:
         psbt_data = self.psbt.serialize()
 
         self.psbt = None  # Remove PSBT free RAM
-        gc.collect()
+        #gc.collect()
 
         if self.qr_format == FORMAT_BBQR:
             from .bbqr import encode_bbqr

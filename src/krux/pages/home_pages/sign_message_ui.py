@@ -153,7 +153,7 @@ class SignMessage(Utils):
 
         # memory management
         del data
-        gc.collect()
+        #gc.collect()
 
         self.ctx.display.clear()
         self.ctx.display.draw_centered_text(

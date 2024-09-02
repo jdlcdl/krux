@@ -196,5 +196,5 @@ class Camera:
 
     def stop_sensor(self):
         """Stops capturing from sensor"""
-        gc.collect()
+        #gc.collect()
         sensor.run(0)

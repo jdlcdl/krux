@@ -297,7 +297,7 @@ class Home(Page):
         signer = PSBTSigner(self.ctx.wallet, data, qr_format, psbt_filename)
 
         del data
-        gc.collect()
+        #gc.collect()
 
         # Warns in case of path mismatch
         path_mismatch = signer.path_mismatch()
@@ -378,7 +378,7 @@ class Home(Page):
 
         # memory management
         del outputs
-        gc.collect()
+        #gc.collect()
 
         index = self._sign_menu()
 
@@ -397,7 +397,7 @@ class Home(Page):
 
             # memory management
             del signer
-            gc.collect()
+            #gc.collect()
 
             self.display_qr_codes(signed_psbt, qr_format)
 
@@ -409,7 +409,7 @@ class Home(Page):
 
         # index == 1: Sign to SD card
         psbt_filename = self._format_psbt_file_extension(psbt_filename)
-        gc.collect()
+        #gc.collect()
 
         if psbt_filename and psbt_filename != ESC_KEY:
             if signer.is_b64_file:

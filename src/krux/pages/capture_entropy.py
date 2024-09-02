@@ -165,7 +165,7 @@ class CameraEntropy(Page):
             self.entropy_measurement_update(img)
 
         self.ctx.display.to_portrait()
-        gc.collect()
+        #gc.collect()
         sensor.run(0)
 
         # User cancelled

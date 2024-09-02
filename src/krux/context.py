@@ -46,7 +46,7 @@ class Context:
         self.wallet = None
         if self.printer is not None:
             self.printer.clear()
-        gc.collect()
+        #gc.collect()
 
     def is_logged_in(self):
         """Returns True if user is logged-in with private key material"""

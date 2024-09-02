@@ -137,7 +137,7 @@ class FileManager(Page):
             else:
                 submenu, menu_items, items = (None, None, None)
                 del submenu, menu_items, items
-                gc.collect()
+                #gc.collect()
                 return path
 
     def show_file_details(self, file):

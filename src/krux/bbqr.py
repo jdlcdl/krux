@@ -158,7 +158,7 @@ def encode_bbqr(data, encoding="Z", file_type="P"):
                 data = cmp
 
     data = data.encode("utf-8") if isinstance(data, str) else data
-    gc.collect()
+    #gc.collect()
     return BBQrCode("".join(base32_encode_stream(data)), encoding, file_type)
 
 

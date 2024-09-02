@@ -110,7 +110,7 @@ class Addresses(Page):
 
                 if index == len(submenu.menu) - 1:  # Back
                     del submenu, items
-                    gc.collect()
+                    #gc.collect()
                     return MENU_CONTINUE
                 if index == len(submenu.menu) - 2:  # Next
                     stay_on_this_addr_menu = False
@@ -192,7 +192,7 @@ class Addresses(Page):
                     if found:
                         break
 
-                gc.collect()
+                #gc.collect()
 
                 if not found:
                     self.ctx.display.clear()
