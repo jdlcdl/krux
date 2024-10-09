@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import os
+import hashlib
 from machine import SDCard
 from .settings import SD_PATH
 
@@ -94,3 +95,16 @@ class SDHandler:
             return (os.stat(filename)[0] & 0x4000) == 0
         except OSError:
             return False
+
+
+    @staticmethod
+    def sha256(filename):
+        """Returns the sha256 hash of the contents of filename"""
+        hasher = hashlib.sha256()
+        with open(filename, "rb", buffering=0) as file:
+            while True:
+                chunk = file.read(4096)
+                if not chunk:
+                    break
+                hasher.update(chunk)
+        return hasher.digest()
