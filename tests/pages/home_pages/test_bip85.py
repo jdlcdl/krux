@@ -36,6 +36,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -51,6 +52,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words out
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -67,6 +69,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_PAGE,  # Move to 24 words
                 BUTTON_ENTER,  # Choose 24 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -82,6 +85,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -98,6 +102,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
                 BUTTON_ENTER,  # Confirm
@@ -112,6 +117,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_PAGE_PREV,  # Move to "Go" with no index assigned
                 BUTTON_ENTER,  # Go
                 # Loop back to initial state
@@ -130,6 +136,7 @@ def test_bip85_bip39_mnemonic_derivation(mocker, amigo, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_PAGE,  # Move to 2
                 *([BUTTON_ENTER] * 12),  # Type 222222222222
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Go"
@@ -218,6 +225,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -233,6 +241,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words out
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -249,6 +258,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_PAGE,  # Move to 24 words
                 BUTTON_ENTER,  # Choose 24 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Child index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -266,6 +276,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
                 BUTTON_ENTER,  # Child index 1
+                BUTTON_ENTER,  # by digits
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
                 BUTTON_PAGE,  # Cancel
@@ -280,6 +291,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Esc"
                 BUTTON_ENTER,  # Press "Esc"
                 BUTTON_ENTER,  # Confirm
@@ -294,6 +306,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_PAGE_PREV,  # Move to "Go" with no index assigned
                 BUTTON_ENTER,  # Go
                 # Loop back to initial state
@@ -312,6 +325,7 @@ def test_bip85_bip39_mnemonic_derivation_m5(mocker, m5stickv, tdata):
             [
                 BUTTON_ENTER,  # BIP39 Mnemonics
                 BUTTON_ENTER,  # 12 words
+                BUTTON_ENTER,  # by digits
                 BUTTON_PAGE,  # Move to 2
                 *([BUTTON_ENTER] * 12),  # Type 222222222222
                 *([BUTTON_PAGE_PREV] * 2),  # Move to "Go"
@@ -389,6 +403,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to "Base64 Password"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -406,6 +421,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to "Base64 Password"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -423,6 +439,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to "Base64 Password"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -443,6 +460,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to "Base64 Password"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -458,6 +476,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to "Base64 Password"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -479,6 +498,7 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to "Base64 Password"
                 BUTTON_ENTER,  # Confirm
+                BUTTON_ENTER,  # by digits
                 BUTTON_ENTER,  # Index 1
                 BUTTON_PAGE_PREV,  # Move to "Go"
                 BUTTON_ENTER,  # Go
@@ -505,7 +525,8 @@ def test_bip85_base64_password_derivation(mocker, amigo, tdata):
             [
                 BUTTON_PAGE,  # Move to "Base64 Password"
                 BUTTON_ENTER,  # Confirm
-                *([BUTTON_PAGE_PREV] * 4),  # Type 21 characters
+                BUTTON_ENTER,  # by digits
+                *([BUTTON_PAGE_PREV] * 4),  # Move back to 0
                 BUTTON_ENTER,  # Index 0
                 *([BUTTON_PAGE] * 3),  # Move to "Go"
                 BUTTON_ENTER,  # Go

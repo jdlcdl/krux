@@ -311,6 +311,7 @@ def test_load_bip85_from_wallet_menu(mocker, amigo, tdata):
         BUTTON_ENTER,  # Agree
         BUTTON_ENTER,  # BIP39 Mnemonics
         BUTTON_ENTER,  # 12 words
+        BUTTON_ENTER,  # by digits
         BUTTON_ENTER,  # Index 1
         BUTTON_PAGE_PREV,  # Move to "Go"
         BUTTON_ENTER,  # Go

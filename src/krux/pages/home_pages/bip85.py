@@ -31,6 +31,10 @@ from .. import (
     Menu,
     Page,
     DIGITS,
+    LETTERS,
+    UPPERCASE_LETTERS,
+    NUM_SPECIAL_1,
+    NUM_SPECIAL_2,
     ESC_KEY,
     choose_len_mnemonic,
 )
@@ -43,6 +47,22 @@ PWD_MAX_LEN = 86
 
 class Bip85(Page):
     """UI to export and load BIP85 entropy"""
+
+    def _capture_index_menu(self):
+        """Capture bip85 index via digits or crc32(text)"""
+        submenu = Menu(
+            self.ctx,
+            [
+                (t("Index by digits"), lambda: None),
+                (t("Index by CRC32"), lambda: None),
+            ],
+        )
+        idx, _ = submenu.run_loop()
+        if idx == 0:
+            return self._capture_index()
+        if idx == 1:
+            return self._capture_crc31_index()
+        return None
 
     def _capture_index(self):
         """Capture the index from the user"""
@@ -62,13 +82,33 @@ class Bip85(Page):
                 continue
             return child_index
 
+    def _capture_crc31_index(self):
+        """Capture the `crc32() % 2^31` value of user text"""
+        from binascii import crc32
+
+        while True:
+            text = self.capture_from_keypad(
+                t("Case-Sensitive"),
+                [LETTERS, UPPERCASE_LETTERS, NUM_SPECIAL_1, NUM_SPECIAL_2],
+            )
+            if text == ESC_KEY:
+                return None
+            try:
+                child_index = crc32(text.encode()) % 2**31
+            except:  # Empty input
+                continue
+            self.ctx.display.clear()
+            self.ctx.display.draw_centered_text(t("Index") + ": " + str(child_index))
+            self.ctx.input.wait_for_button()
+            return child_index
+
     def _derive_mnemonic(self):
         """Derive a BIP85 mnemonic"""
         num_words = choose_len_mnemonic(self.ctx)
         if not num_words:
             return
 
-        child_index = self._capture_index()
+        child_index = self._capture_index_menu()
         if child_index is None:
             return
 
@@ -125,7 +165,7 @@ class Bip85(Page):
 
     def _derive_base64_password(self):
         """Derive a BIP85 base64 password"""
-        child_index = self._capture_index()
+        child_index = self._capture_index_menu()
         if child_index is None:
             return
 
