@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Title</title>
+<meta charset="utf-8">
+<style>
+@import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+@import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+@import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+body { font-family: 'Droid Serif'; }
+h1, h2, h3 {
+	font-family: 'Yanone Kaffeesatz';
+	font-weight: normal;
+}
+.remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+</style>
+</head>
+<body>
+<textarea id="source">
+<!-- END `github.com/gnab/remark` HEADER BOILERPLATE -->
+
+
+---
+class: center, middle
+
+# DIY Hardware Wallet Retreat
+November 5th 2025, São Paulo, Brazil
+
+```
+best=00000000000000000001d4f6111734ab17860a4eed2e7c6a7c5f080d7fbbc091 height=921212
+```
+<hr>
+
+## KEF Encryption Format 
+...for air-gapped end-to-end encryption
+
+
+???
+
+Thank you Vinteum -- and attendees, for traveling the world, and coming together for this event.
+
+Who am I?
+Jean Do is a nym I use for contributing to FOSS freedom tools,
+It's a play on the proper nown "John Doe" -- a person unknown, male, except with a french accent pronounced like "Jean Do" ou zhee-day, or JD, or Jean, or John, or even Gene works.  The github username is `jdlcdl`, inspired by Jean's email address jean.dominique.lecomte.delisle@proton.me.
+
+A disclaimer: I am NOT a cryptologist... but if YOU ARE then please raise your hand so that others can see, and so they may may approach you about any content presented here.  Beyond this disclaimer, whether we admit it or not, I'll argue that wwe're all effectively cryptographers, in that we're practitioners of applied-cryptography.
+
+
+---
+class: middle
+
+# Goals for this Presentation:
+
+## Why KEF for bitcoiners?
+
+## What is KEF? ...and what KEF is NOT?
+
+## How KEF works: specs, details, and gotchas.
+
+as well as examples, a few memes, and a KEF challenge.
+
+???
+
+Goals,
+
+You'll learn why bitcoiners might have an interest in using KEF; whether for mnemonics, passphrases, output-descriptors, PSBTs, text documents, or even other KEF envelopes and/or KEF decryption keys.
+
+You'll learn what KEF is and what KEF is NOT, and I'll help to describe its limitations as well as to delineate exactly what KEF can solve, highlighting what users must respect and what implementators may need to add, in order to make KEF useful.  We'll briefly scan over the KEF Specifications document, reference implementation and its test-suite -- focussing on touchy gotchas, so that adopting implementors will be able to refer to them in the future.
+
+Along the way, there will be simple examples, sprinkled with memes, and I'll close-out proposing a KEF challenge -- hopefully with a happy-ending, else setting up for a future post-mortem.
+
+
+---
+class: middle
+
+# "Can you keep a secret?"
+...it's a question directed inward
+
+## Priority #1 for every bitcoiner:
+
+### Must answer **"Yes I can!"** with sincere confidence
+
+### Must express **"Yes I can!"** in action - no exceptions
+
+???
+
+Is it truly a secret you created?
+- only you know it?
+- nobody could ever reproduce it?
+
+Are you capable of retrieving it far into the future?
+
+Are you capable of using it without leaking it?
+
+I'll argue that everyone here today is deeply involved in helping to solve this seemingly simple question.
+We enable keeping "hard" secrets, as easy and accessible as possible, even full-proof -- pun intended.
+
+
+---
+class: center, middle
+
+![020-enc_or_plain.png](./020-enc_or_plain.png)
+
+
+---
+class: middle
+
+# Plaintext Backups (BIP-39)
+
+Pros:
+### Minimal complexity: something you have + [ something you know ]
+### Industry-wide support
+
+Cons:
+### Changes require complete setup/testing, on-chain activity
+### Multiple backups may be a liability
+### Transition from "securely-stored" to "in-use" may be a liability
+
+???
+
+Pros:
+The simple scheme of BIP-39 mnemonic and/or passphrase has been proven by many over time.  It is supported by so many projects that it's safe to say that it will survive far into the future.
+
+Cons:
+But to make any change to either mnemonic or passphrase requires full wallet setup. Generate new secrets, setup new wallet, and backup(s), verify addresses, test signing, distribute the backups, and then move/sweep each UTXO on-chain to the new setup -- with the all of the hastle/expense/privacy-risks that this entails.
+
+But are your backups secure?  Do you have a safe place to hide them?  Will you know if they've been disturbed?  How many duplicates can you securely store? ...and will you remember how-many -- and where they all are?
+
+Not everyone has true "security" where they call home, or at their work-place.  Most are actually co-habiting with others, some are jet-set -- on the go, or couch-surfing, or in a colocation.  Even if you own or rent an independent home, do you know every invitee of your family members, and do you believe that others living or invited into your home wouldn't be able to identify a plaintext backup for what it might represent?
+
+---
+class: middle
+
+# Encrypted Backups
+
+Pros:
+### Modify backups at any time w/o altering setup, w/o onchain activity
+### Multiple backups; including ones only heirs/others can decrypt
+### Plaintext secret revealed only on-device
+
+Cons:
+### Complexity, yet another "secret" to keep secure
+### Weak-keys, poor implementation, unknowns
+### KEF: Limited support - Krux and 3rdIteration's SeedSigner fork
+
+???
+
+Pros:
+As long as your wallet setup is still secure, you can modify encryption keys without altering that setup, and without any on-chain activity.
+
+Since decryption to plaintext occurs inside a "trusted" signing device, secrets are not exposed to the real world while using them.
+
+You can make as many encrypted backups of the same plaintext secrets as you like.  Including ones for your heirs that only they can decrypt (even multi-layered to mitigate risk of an heir using a weak key). 
+
+Cons:
+With encryption we're adding complexity to our setup without being able to avoid "Priority #1", our fundamental responsibility to address the question "Can you keep a secret?".  Arguably, now we have even more secrets to keep.
+
+And whenever there is a new "secret" to keep, users may become "lazy" picking their encryption key, leading to a false sense of security.  "My backups are all encrypted!!!", but "abc" is useless as an encryption key.  While imperfect humans might write great software, we also write bugs, so poor implementation can be a problem at both ends: during encryption as well as decryption.  While AES is finally a mature adult, assume that we won't learn of its latest flaws until it's too late.
+
+For KEF specifically, it is rather new -- first released in September 2023 and extended to its current form only recently. KEF is supported ONLY by Krux and YTCryptoGuide's SeedSigner fork. Without further adoption, users who rely on a KEF encrypted backup may someday find their secure backup in perfect shape, remembering the decryption key perfectly, and have trouble finding tools to decrypt their backup -- or at least to do so in a safe computing environment like an air-gapped signing device.  No matter how much someone loves KEF today, they'd need their head examined if relying 100% on any KEF backup; future adoption of KEF could ease that concern.
+
+
+---
+class: center, middle
+
+![010-2030agenda-meme.jpg](./010-2030agenda-meme.jpg)
+
+
+---
+class: center, middle
+
+# KEF Encryption Format:
+## The K stands for "KEF"
+
+<hr>
+
+## Originally released in Krux v23.09.0
+...for encrypting BIP-39 mnemonics
+
+## Extended in Krux v25.09.0
+...for encrypting variable length data
+
+
+---
+class: middle
+
+## KEF's Utility and Features
+
+- KEF is a low-tech simple implementation, far from bleeding-edge,
+
+- offering various modes-of-operation, commonly hw-optimized on various platforms,
+
+- having a few different versions to better-fit particular plaintext use-cases;
+
+- minimalistic: it is biased towards resource-constrained micro-controllers.
+
+- A KEF envelope may offer plausible deniability *or* it may arguably contain enough information to decrypt itself -- via LMM (provided the correct decryption key).
+
+
+---
+class: middle
+
+## KEF uses existing cryptographic primitives
+
+### AES-256 + PBKDF2_HMAC + SHA256
+
+- **Advanced Encryption Standard (AES)**
+- **Secure Hash Algorithm (SHA256)**
+- **Password Based Key Derivation Function v2 (PBKDF2)**
+- **Hash-based Message Authentication Code (HMAC)**
+
+**KEF treats primitives as a black-box:**
+
+- user supplies: **password** + [**salt**],
+
+- pbkdf2_hmac_sha256 **iterates** a sane-yet-variable number of times, resulting: 256-bit key,
+
+- user's plaintext is encrypted via AES-256 using that key and a particular mode-of-operation -- defined by the KEF **version**, resulting in ciphertext,
+
+- a few **auth** bytes [and others] -- enabling validated decryption, are included, resulting in a **cipher payload**,
+
+- the **salt**, KEF **version**, **iterations**, and **cipher payload** are assembled into a minimalistic **KEF Envelope**.
+ 
+
+---
+class: middle
+
+## A KEF Envelope is:
+
+#### a layout of bytes,
+- *mostly* identifiable as KEF -- **if looking for it**,
+- **without:** magic bytes, envelope length, checksum, or raison-d'être,
+- by default, nothing about it screams "I am a KEF Envelope!".
+
+#### Every KEF Envelope is composed of:
+**Id** + **Version** + **Iterations** + **CipherPayLoad**
+- variable-length user-defined **Id** (as a name/label -- used as salt),
+- 1-byte **Version** number (implies KEF rule-set),
+- 3-byte PBKDF2 **Iterations** (for stretching the AES key),
+- variable-length **CipherPayLoad**.
+
+**
+If any bytestring has a valid *version* byte,
+and the rest of the envelope parses according to KEF's rules for that version,
+then it *might* be a KEF envelope.
+**
+
+### Only the owner knows for sure.
+
+
+---
+class: center, middle
+![071-getting-hot-kef.png](./071-getting-hot-kef.png)
+
+
+
+<!-- BEGIN `github.com/gnab/remark` FOOTER BOILERPLATE -->
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
