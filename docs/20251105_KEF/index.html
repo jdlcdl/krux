@@ -21,6 +21,10 @@ h1, h2, h3 {
 <textarea id="source">
 <!-- END `github.com/gnab/remark` HEADER BOILERPLATE -->
 
+???
+confirm mic levels, screen sharing, chat window. 
+Write blockheight-line, git add/commit/push,
+got coffee, and water, take notes?
 
 ---
 class: center, middle
@@ -29,13 +33,19 @@ class: center, middle
 November 5th 2025, São Paulo, Brazil
 
 ```
-best=00000000000000000001d4f6111734ab17860a4eed2e7c6a7c5f080d7fbbc091 height=921212
+best=000000000000000000007717ef2407e31ff55715d2e94f899f2dda7e59a3371e height=921749
 ```
 <hr>
 
 ## KEF Encryption Format 
 ...for air-gapped end-to-end encryption
 
+???
+I'm Jean Do or JD.  I discovered seedsigner in late 2022 (Alex Waltz tweet), then followed embit, then krux in mid 2023 since I wanted to see other uses of embit and micropython.  My wife and daughters gifted me an Amigo for Father's Day, so I took a deeper look into Krux.
+
+Disclaimer: I have no training or education in cryptography.  If you do, please raise your 
+hand now so others know that you do, and raise it whenever I need to be corrected so others
+can see.  Please jot notes for any of my assertions that need to be questioned later.
 
 ---
 class: middle
@@ -50,6 +60,11 @@ class: middle
 
 as well as examples, a few memes, and a KEF challenge.
 
+???
+READ SLIDE!
+no live samples,
+will take questions if time-permits,
+challenge is audience-participation only.
 
 ---
 class: middle
@@ -63,48 +78,69 @@ class: middle
 
 ### Must express **"Yes I can!"** in action - no exceptions
 
+???
+All of us here are working on this.
+did you create it? 
+sure nobody else can recreate it? 
+will remember it or be able to retrieve it forever? 
+can use it w/o leaking?
 
 ---
 class: center, middle
 
 ![020-enc_or_plain.png](./020-enc_or_plain.png)
 
+???
+Both are fit, attractive, same size, similar features.
+plaintext is safely secured.
+But encrypted is walking confidently - alone in public,
+plaintext might also look good encrypted?
 
 ---
 class: middle
 
-# Plaintext Backups (BIP-39)
+# Trade-offs of Plaintext Backups (BIP-39)
 
 Pros:
 ### Minimal complexity: something you have + [ something you know ]
 ### Industry-wide support
 
 Cons:
-### Changes require complete setup/testing, on-chain activity
+### Changes require new wallet setup/testing, and on-chain activity
 ### Multiple backups may be a liability
-### Transition from "securely-stored" to "in-use" may be a liability
+### Transitioning from "securely-stored" to "in-use" may be a liability
 
+???
+READ-SLIDE!
+Plain works, but maybe it can remain "secured", w/o risk of leaks when accessed or distant.
 
 ---
 class: middle
 
-# Encrypted Backups
+# Trade-offs of KEF Encrypted Backups
 
 Pros:
-### Modify backups at any time w/o altering setup, w/o onchain activity
+### Modify backups at any time w/o altering setup or onchain activity
 ### Multiple backups; including ones only heirs/others can decrypt
-### Plaintext secret revealed only on-device
+### Plaintext secret revealed ONLY on-device
 
 Cons:
 ### Complexity, yet another "secret" to keep secure
-### Weak-keys, poor implementation, unknowns
-### KEF: Limited support - Krux and 3rdIteration's SeedSigner fork
+### **Weak-keys** + poor implementation + unknown unknowns
+### Limited KEF support - Krux, 3rdIteration's SeedSigner fork
+
+???
+READ-SLIDE!
+Those who need KEF currently are reliant on Krux and less peer-reviewed projects, might they deserve being supported elsewhere too?
 
 
 ---
 class: center, middle
 
 ![010-2030agenda-meme.jpg](./010-2030agenda-meme.jpg)
+
+???
+Will we reminisce about plaintext backups someday?
 
 
 ---
@@ -121,10 +157,17 @@ class: center, middle
 ## Extended in Krux v25.09.0
 ...for encrypting variable length data
 
+???
+Originally, it was the "Krux encrypted mnemonic binary QR format", for mnemonics only.
+Recently, work analyzing, extending, defining and testing edges-cases - for general-use.
+Emphasize preparatino to free KEF for adoption by other projects.
 
 ---
 class: center, middle
 ![xkcd-standards.png](./xkcd-standards.png)
+
+???
+Which other encryption standards for stateless signers?
 
 ---
 class: middle
@@ -143,6 +186,9 @@ class: middle
 
 - may be plausibly-deniable *or* may be fully-self-descriptive
 
+???
+READ-SLIDE! Note: no versions hide length of plaintext... more versions for this?
+
 
 ---
 class: middle
@@ -153,8 +199,8 @@ class: middle
 
 - Advanced Encryption Standard **AES**
 - Secure Hash Algorithm **SHA256**
-- Password Based Key Derivation Function v2 **PBKDF2)**
-- Hash-based Message Authentication Code **(HMAC)**
+- Password Based Key Derivation Function v2 **PBKDF2**
+- Hash-based Message Authentication Code **HMAC**
 
 **KEF treats primitives as a black-box:**
 
@@ -167,7 +213,10 @@ class: middle
 - include **auth** bytes [and others]: result = **cipher payload**,
 
 - the **salt**, KEF **version**, **iterations**, and **cipher payload** are assembled into a minimalistic **KEF Envelope**.
- 
+
+???
+In a nutshell: User supplies an encryption-key and an Id to encrypt.  Their key - as password and Id - as salt, are stretched to make a 256-bit AES key.  Plaintext is then encrypted, auth validation bytes - and others - are added as cipher payload, and everything is assembled into a minimalistic KEF envelope.
+
 
 ---
 class: middle
@@ -187,17 +236,29 @@ class: middle
 - variable-length **CipherPayLoad**.
 
 **
-If any bytestring has a valid *version* byte,
-and the rest of the envelope parses according to KEF's rules for that version,
-then it *might* be a KEF envelope.
+If any bytestring has a valid *version* byte, and the rest of the envelope parses 
+according to KEF's rules for that version, then it *might* be a KEF envelope.
 **
 
 ### Only the owner knows for sure.
+
+???
+READ-SLIDE top-third, then bold only!
 
 
 ---
 class: center, middle
 ![040-karen-multisig.png](./040-karen-multisig.png)
+
+???
+Karen is screaming, nobody understands what she's saying.  The cat sees a KEF envelope, 
+with 347 bytes of cipher payload. It is named "2of3-multisig", using AES-GCM with 
+compression, and a key stretched 503,974 times.
+
+Above the cat, the envelope's unsealed exterior is presented to the user with an option to
+decrypt. The user needs to see this -- and get a chance to bail-out, in case they scanned
+the wrong envelope, before proceeding to input their key and decrypt.
+
 
 ---
 class: middle
@@ -224,6 +285,19 @@ https://github.com/selfcustody/krux/tree/main/src/krux/kef.py
 https://github.com/selfcustody/krux/tree/main/tests/test_kef.py
 
 
+???
+References to dig deeper into KEF are all contained in the official Krux repo.
+The specifications document was an after-thought, it needs revision (docs don't execute).
+
+The kef.py module is very simple with a VERSIONS dictionary as its rule-set,
+a single class to initialize the AES-256 key, .encrypt(), .decrypt() and .authenticate(),
+as well as a few helper functions for selecting a preferred version, dealing with padding,
+and assembling/parsing KEF envelopes.
+
+Note: The test-suite is valuable for understanding intentions, what KEF is capable of,
+known edge-cases for different versions, and for playing with various parameters.
+Could one implement KEF from the test-suite alone? Maybe -- consider starting there.
+
 ---
 class: middle
 
@@ -247,28 +321,50 @@ Specifics for each version
 - **KEF Implementation Concepts**:
 Introduction to Krux's KEF implementation and test-suite
 
+???
+READ-SLIDE bold only!
 
 ---
 class: center, middle
 ![KEFspecs-common-structure.png](./KEFspecs-common-structure.png)
 
+???
+Reitering that each KEF envelope is composed of Id, version, Iterations, and cipher payload.
+Since the Id is variable-length, the very first byte is the length of the Id field. As well
+note that the 3 byte Iterations field is interpretted to guarantee a minimum of 10,000
+PBKDF2 iterations when stretching the user supplied key.  Last of all, different versions
+imply their own cipher payload structure.
+
+
 ---
 class: center, middle
 ![KEF-version-details-v20.png](./KEF-version-details-v20.png)
+
+???
+For example, here we see details for the Krux default version: Uncompressed AES-GCM, version #20.
+
+Focusing on the top-half of this slide -- with light-grey background, this text comes 
+from a function in the test suite which self-documents each version. Arguably, it contains 
+enough detail for an LMM to vibe-code a decryption routine.  This self-documentation
+function is also terse enough to fit into the Id field of a KEF envelope.
+
+Therefore, KEF envelopes can be plausibly deniable, but could also contain similar
+layout and ruleset documentation that they're ultra self-documenting.
 
 ---
 class: center, middle
 ![041-karen-multisig-explained.png](./041-karen-multisig-explained.png)
 
+???
+READ-SLIDE briefly to review.
 
 ---
 class: middle
 
 ## Why so many KEF versions?
 
-
 KEF wants to *play well with others*, offering choices to different projects, 
-as well as choices to bitcoiners who use those different projects.
+as well as choices to bitcoiners who use those projects.
 
 **Not all platforms readily support the same AES modes-of-operation.**
 
@@ -279,12 +375,23 @@ as well as choices to bitcoiners who use those different projects.
 
 **Block modes ECB/CBC require padding; stream modes CTR/GCM do not**
 
-- ECB and CBC each have versions with *unsafe* NUL padding, and *safe* PKCS#7 padding
+- ECB and CBC each have versions with *unsafe* NUL padding AND *safe* PKCS#7 padding
 
 ** Uncompressed or Compressed versions for each mode**
 - Since compression has parameters, a simple common compression scheme (same as BBQr)
   has been chosen to avoid unnecessary coordination between projects exchanging KEFs
 
+???
+Why so many KEF versions?  It's about playing well with others, so that KEF is attractive
+for adoption by projects on different platforms.
+
+ex) Krux didn't need CTR mode, the K210 already has 3 built-in hw-optimized AES 
+modes-of-operation.  CTR was added for platforms and microcontrollers that may not have the 
+same modes readily available.  This way, users of KEF can select modes common to the
+projects they use.
+
+Different KEF versions exist to support each AES mode-of-operation. For block-modes that
+require padding, there are versions with safe and unsafe padding, and each mode has a version for compression.
 
 ---
 class: middle
@@ -307,9 +414,15 @@ class: middle
 | 21   | AES-GCM +c | 12b Nonce, compression         | GCM authtag[:4] Exposed      |
 
 Notes:
-- besides versions 0,1, others are slotted by mode-of-operation (slots of 5)
+- besides ver.: 0 and 1, other modes-of-operation are slotted into slots of 5.
 - versions 32-126 likely never-to-be-used (conflict with printable ASCII)
 - versions 253-255 likely reserved for future (ie: versions 253/254/255 might indicate reading the next 2/4/8 bytes as version rule-set bitmaps)
+
+???
+In summary: 
+block modes have 4 versions each (original v1, 2 padding strategies, and 1 for compressed);
+stream modes have 2 versions each (normal and compressed);
+Note: some versions expose auth bytes, requiring special treatment around this validation data.
 
 ---
 class: middle
@@ -318,19 +431,24 @@ class: middle
 Adoption means that KEF envelopes will be more recoverable into the future,
 and that bitcoiners won't be *locked-in* to a particular signing device...
 
-**Full Support:**
-- Implementation supports **decryption** AND **encryption** for all KEF versions (ie: Krux and 3rdIteration's SeedSigner fork)
-
-**Complete Support per Version:**
-- Implementation supports **decryption** AND **encryption** for a particular version
-
 **Decrypt-Only Support per Version:**
-- Implementation supports **decryption-only** for a particular version
+- Supports **decrypt() only** for particular version(s).
 
-It's FOSS, every project is free to mix and match whichever versions they want to support; even to nudge their *users*
-towards the versions they prefer.  Nobody will issue **Certified KEF Support** badges, that entity doesn't exist.
+**Full Support per Version:**
+- Supports **encrypt() + decrypt()** for particular version(s).
 
-Simply write the code and claim that you support KEF.  Myself and others will happily open an *issue* or a *pull-request* if disputing *claims* become necessary.
+**Full Support:**
+- Supports **encrypt() + decrypt()** for all versions.<br />
+  currently: Krux on K210, KruxMobileApp on android, Krux simulator on win/mac/*nix, and 3rdIteration's SeedSigner fork.
+
+It's FOSS, projects are free to mix and match whichever versions they want to support; 
+even to nudge *users* towards the versions they prefer.  No authority exists to issue **Certified KEF Support** badges.
+
+Write the code and claim that you support KEF.  Others will open an *issue* or a *pull-request* if disputing a *claim* becomes necessary.
+
+???
+READ-SLIDE top line only.  Any support for KEF is the start to adoption, decrypt only,
+or just for modes available on your platform.  It's FOSS, w/o a certification authority.
 
 
 ---
@@ -338,19 +456,23 @@ class: middle
 
 ## KEF Implementation Gotchas
 
-**Truncated auth bytes**
-- AES-ECB has 3-byte *auth*.  false decryption-success 1:16M
-- most others have 4-byte *auth*.  False decryption-success 1:4B
-- Bug or Feature? can be used to grind alternate decryption keys that result in useless/wrong plaintext bytes.
-
 **Duplicate plaintext blocks using mode ECB**
-- FAIL TO ENCRYPT!!!
-- select another Mode or ECB+compression which may result in plaintext without duplicate blocks
+- BE STRICT, FAIL TO ENCRYPT!!!
+- Select another Mode or ECB+compression which *may* result in plaintext without duplicate blocks.
 
 **Versions with *unsafe* NUL-pad**
-- if *auth* exposed and *plaintext* ends NUL (0x00): FAIL TO ENCRYPT!
-- if *auth* is hidden and *auth* ends NUL (0x00): FAIL TO ENCRYPT!
+- BE STRICT, FAIL TO ENCRYPT!!!
+  - If *auth* exposed and *plaintext* ends NUL (0x00)
+  - If *auth* is hidden and *auth* ends NUL (0x00)
 - Consider making a *reasonable* effort to successfully decrypt when it appears the above rules were broken.
+
+**Truncated auth bytes**
+- AES-ECB has 3-byte *auth*.  False decryption-success rate is 1:16M
+- Most others have 4-byte *auth*.  False decryption-success rate is 1:4B
+- Bug or Feature? Can grind alternate decryption keys that result in useless/wrong plaintext bytes.
+
+???
+The top 2 sections are very important.  The last one doesn't worry me.
 
 
 ---
@@ -360,15 +482,21 @@ class: middle
 
 **Falsely Identifying a bytestring as a KEF Envelope**
 
-Since no KEF versions use a version-byte which is printable ASCII, most textual data won't be confused as a KEF envelope.
+Textual data won't be confused as a KEF envelope since KEF versions use unprintable bytes.
 
-Bytestrings however, like binary PSBTs, will parse as a KEF envelope from time to time.  Therefore, different strategies for how to ingest a KEF might be:
+Various bytestrings however, like binary PSBTs, will parse as a KEF envelope from time to time.  Therefore, different strategies for how to ingest a KEF might be:
 
-- **Explicitely as KEF**: Offer the choice for user to load a KEF envelope within a particular context. Present envelope with a choice to "Decrypt?"
+- **Explicitely as KEF**: Offer the choice for user to load a KEF envelope.
 
-- **KEF in Priority**: Try converting data to bytes, then try to parse as KEF. If KEF, present envelope with a choice to "Decrypt?".  If not KEF or if user declines, treat original data within context.
+- **KEF in Priority**: try to parse as KEF first.  If not KEF or user declines to decrypt, treat original data in context.
 
-- **Fallback to KEF**: Use the data as plain within context, if parsing fails, try KEF and reparse in same context after plaintext is revealed.
+- **Fallback to KEF**: try to parse data in context but if parsing fails, try as KEF.
+
+The user ALWAYS deserves to be presented with the KEF Envelope and offered a choice to 
+decrypt.
+
+???
+READ-SLIDE!
 
 
 ---
@@ -378,32 +506,58 @@ class: middle
 
 **Important Considerations Outside the Scope of KEF**
 
-KEF is a string of bytes, parseable, sometimes plausibly deniable, without indication of *purpose*.
-Implementors are free to consider wrapping KEF envelopes with *magic* bytes, *purpose* and/or *length* headers -- and a *checksum*, but it's outside the scope of KEF (currently).  Share ideas with Krux and other projects, embracing the ethos to "play well with others".
+KEF envelopes, as a string of bytes, are parseable, often deniable, with no indication of *purpose*.
 
-As well, implementors will need to consider encodings that make sense, also outside the scope of KEF.
-- **binary**: compact but not great for all QR scanners
-- **hex or HEX**: understood by all, available on small keypads, far from compact
-- **base32**: available in many libs, somewhat compact as QRs
-- **base43**: same algo as base58 w/ different alphabet... originally from *electrum*.  Very compact for QRs, but slow for large content
-- **base64**: understood by all, compact for json - less compact for QRs
+Implementations may consider wrapping KEF envelopes with *magic* bytes, a *purpose* and/or *length*, and a *checksum*, but it's *currently* out-of-scope for KEF).  Consider sharing ideas and embracing the ethos to *play well with others*.
+
+Implementors will also need to consider encodings that make sense for storage and/or transport. While important, these decisions rest outside the scope of KEF.
+- **binary**: most compact, not ideal for all QR scanners.
+- **hex or HEX**: supported by all, available to small keypads, not compact.
+- **base32**: widely supported, somewhat compact as QRs.
+- **base43**: *(electrum)* same algo as base58; very compact for QRs; slow for large content.
+- **base64**: supported by all, compact for json - not so compact for QRs.
+
+Krux is biased to export base43 QRs, base64 to json, and binary to sdcard... but all-of-above are checked when injesting and all are available via DatumTool.
+
+???
+Since KEF envelopes have no magic-bytes, envelope length, or checksum, feel free to wrap KEF in whatever is needed.  I'd just ask for implentations to share their thoughts and try to embrace playing well with others.
+
+Certainly, each implentation will need to deal with encoding for transport and storage.
+READ-LAST-LINE!
+
 
 ---
 class: center, middle
 ![060-kef_backups_diss.png](./060-kef_backups_diss.png)
 
+???
+Getting back considering our backups, and hardenning that plaintext, We don't always know the future for our family life.
+
 ---
 class: center, middle
-![071-getting-hot-kef.png](./072-got-kef.png)
+![072-got-kef.png](./072-got-kef.png)
+
+???
+Or in our neighborhood, or the other side of the tracks, or online where folks get doxed
+and swatted.
 
 ---
 class: center, middle
 ![030-grampa_KEF.png](./030-grampa_KEF.png)
 
+???
+We also don't know the future at our nation-state or global level, or what might happen 
+after an upcoming election.
+
+
 ---
 class: center, middle
 ![050-KEF-frisson.png](./050-KEF-frisson.png)
 
+???
+But we can choose at any time to harden our backups without modifying our wallet setup
+and without needing to involve on-chain activity... and we might consider doing so 
+on the only devices we can actually trust.
 
 ---
 
