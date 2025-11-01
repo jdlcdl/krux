@@ -79,11 +79,11 @@ class: middle
 ### Must express **"Yes I can!"** in action - no exceptions
 
 ???
-All of us here are working on this.
-did you create it? 
-sure nobody else can recreate it? 
-will remember it or be able to retrieve it forever? 
-can use it w/o leaking?
+Opine: All of us here are working on making it easier to answer "Yes!".
+Did you create it? 
+Sure nobody else can recreate it? 
+Will remember it or be able to retrieve it forever? 
+Can use it w/o leaking?
 
 ---
 class: center, middle
@@ -160,7 +160,7 @@ class: center, middle
 ???
 Originally, it was the "Krux encrypted mnemonic binary QR format", for mnemonics only.
 Recently, work analyzing, extending, defining and testing edges-cases - for general-use.
-Emphasize preparatino to free KEF for adoption by other projects.
+Emphasize preparation to free KEF for adoption by other projects.
 
 ---
 class: center, middle
@@ -168,6 +168,13 @@ class: center, middle
 
 ???
 Which other encryption standards for stateless signers?
+
+BullBitcoin's Recoverbull seems geared for hot wallets on a phone, solving for "backup" w/o spending too much time... so user can get started fast and maybe do normal backups later, or not at all.
+
+Coinkite's KeyTeleport: no complaints at all, but as a standard? Could argue that its design is around encouraging users to buy another device.  It's hard to argue that it was designed to be open and adopted by others, or even that adoption would be possible -- with proprietry fields.
+
+KEF Encryption Format IS designed with open adoption as a goal!
+
 
 ---
 class: middle
@@ -182,7 +189,7 @@ class: middle
 
 - low-tech, simple implementation, far from bleeding-edge.
 
-- KEF envelopes hiding same plaintext not linkable.
+- KEF envelopes hiding same plaintext are not linkable.
 
 - may be plausibly-deniable *or* may be fully-self-descriptive
 
@@ -215,7 +222,7 @@ class: middle
 - the **salt**, KEF **version**, **iterations**, and **cipher payload** are assembled into a minimalistic **KEF Envelope**.
 
 ???
-In a nutshell: User supplies an encryption-key and an Id to encrypt.  Their key - as password and Id - as salt, are stretched to make a 256-bit AES key.  Plaintext is then encrypted, auth validation bytes - and others - are added as cipher payload, and everything is assembled into a minimalistic KEF envelope.
+READ-SLIDE-TOP-2-LINES! In a nutshell: User supplies an encryption-key and an Id to encrypt.  Their key - as password and Id - as salt, are stretched to make a 256-bit AES key.  Plaintext is then encrypted, auth validation bytes - and others - are added as cipher payload, and everything is assembled into a minimalistic KEF envelope.
 
 
 ---
@@ -229,11 +236,11 @@ class: middle
 - by default, nothing about it screams "I am a KEF Envelope!".
 
 #### Every KEF Envelope is composed of:
-**Id** + **Version** + **Iterations** + **CipherPayLoad**
+**Id** + **Version** + **Iterations** + **Cipher Payload**
 - variable-length user-defined **Id** (as a name/label -- used as salt),
 - 1-byte **Version** number (implies KEF rule-set),
 - 3-byte PBKDF2 **Iterations** (for stretching the AES key),
-- variable-length **CipherPayLoad**.
+- variable-length **Cipher Payload**.
 
 **
 If any bytestring has a valid *version* byte, and the rest of the envelope parses 
@@ -560,6 +567,54 @@ and without needing to involve on-chain activity... and we might consider doing 
 on the only devices we can actually trust.
 
 ---
+class: middle, center
+
+&lt fin &gt
+
+---
+class: middle
+
+## KEF Challenge 
+
+Exploring a use case for encrypted backups.
+
+**Can far-away anons, whom we've never met, help to secure our *secrets*?**
+
+- Can we secure our own *secret* with KEF, then ask someone else to blindly add another layer with a key that they'll remember whenever blindly encrypting ours?
+
+- Can we divine a *secret* known only within a particular relationship, and then leave a hint to this *secret* that only the other would know?
+
+- Can we securely transfer multiple *secrets* and instructions to friends or loved ones, by leaving one *secret* with one-or-more trusted associates who will deliver that *secret* to loved-ones after we've departed?
+
+Let's try! 
+
+---
+class: middle
+
+## KEF Challenge
+
+
+Both links below express the same KEF Challenge envelope:
+
+- [KEFChallenge.mp4](./KEFChallenge.mp4) (4MB Fountain-QR UR-bytes mp4 file)
+  - Download and save to computer, view as mp4
+  - in DatumTool, load "via QR" to scan.
+  - expect 45s - 90s of QR scanning
+
+- [KEFChallenge.bin](./KEFChallenge.bin) (10K bin file)
+  - Download and save to computer, copy to SD, insert SD in Krux device
+  - in DatumTool, load "via SD" to import the file.
+
+The encryption key is in the title-bar of this slide-show (w/o " - Brave")
+
+Save the UTF-8 plaintext to SD, then read instructions in a text editor.
+
+Onward!
+
+-JD
+
+---
+
 
 <!-- BEGIN `github.com/gnab/remark` FOOTER BOILERPLATE -->
     </textarea>
