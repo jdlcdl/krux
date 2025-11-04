@@ -33,7 +33,7 @@ class: center, middle
 November 5th 2025, São Paulo, Brazil
 
 ```
-best=000000000000000000007717ef2407e31ff55715d2e94f899f2dda7e59a3371e height=921749
+best=00000000000000000001bd6bd0460f0407be853315f7366501bc3f50e6eddf21 height=922172
 ```
 <hr>
 
@@ -46,6 +46,7 @@ I'm Jean Do or JD.  I discovered seedsigner in late 2022 (Alex Waltz tweet), the
 Disclaimer: I have no training or education in cryptography.  If you do, please raise your 
 hand now so others know that you do, and raise it whenever I need to be corrected so others
 can see.  Please jot notes for any of my assertions that need to be questioned later.
+
 
 ---
 class: middle
@@ -66,6 +67,7 @@ no live samples,
 will take questions if time-permits,
 challenge is audience-participation only.
 
+
 ---
 class: middle
 
@@ -81,9 +83,11 @@ class: middle
 ???
 Opine: All of us here are working on making it easier to answer "Yes!".
 Did you create it? 
-Sure nobody else can recreate it? 
-Will remember it or be able to retrieve it forever? 
-Can use it w/o leaking?
+Are you sure that "practically" nobody else could ever recreate it? 
+Will you remember it, or be able to retrieve it forever? 
+Are you sure that ONLY you can access it?
+Are you sure that you can use it w/o leaking it?
+
 
 ---
 class: center, middle
@@ -93,8 +97,9 @@ class: center, middle
 ???
 Both are fit, attractive, same size, similar features.
 plaintext is safely secured.
-But encrypted is walking confidently - alone in public,
-plaintext might also look good encrypted?
+But encrypted is walking confidently - alone in public.
+Might plaintext also look good encrypted?
+
 
 ---
 class: middle
@@ -102,7 +107,7 @@ class: middle
 # Trade-offs of Plaintext Backups (BIP-39)
 
 Pros:
-### Minimal complexity: something you have + [ something you know ]
+### Minimal complexity: mnemonic + [ passphrase ]
 ### Industry-wide support
 
 Cons:
@@ -114,10 +119,11 @@ Cons:
 READ-SLIDE!
 Plain works, but maybe it can remain "secured", w/o risk of leaks when accessed or distant.
 
+
 ---
 class: middle
 
-# Trade-offs of KEF Encrypted Backups
+# Trade-offs of Encrypted Backups
 
 Pros:
 ### Modify backups at any time w/o altering setup or onchain activity
@@ -160,7 +166,7 @@ class: center, middle
 ???
 Originally, it was the "Krux encrypted mnemonic binary QR format", for mnemonics only.
 Recently, work analyzing, extending, defining and testing edges-cases - for general-use.
-Emphasize preparation to free KEF for adoption by other projects.
+EMPHASIZE preparation to free KEF for adoption by other projects.
 
 ---
 class: center, middle
@@ -171,10 +177,9 @@ Which other encryption standards for stateless signers?
 
 BullBitcoin's Recoverbull seems geared for hot wallets on a phone, solving for "backup" w/o spending too much time... so user can get started fast and maybe do normal backups later, or not at all.
 
-Coinkite's KeyTeleport: no complaints at all, but as a standard? Could argue that its design is around encouraging users to buy another device.  It's hard to argue that it was designed to be open and adopted by others, or even that adoption would be possible -- with proprietry fields.
+Coinkite's KeyTeleport: no complaints at all, but as a standard? Could argue that its design is around encouraging users to buy another device.  It's hard to argue that it was designed to be open and adopted by others, or even that adoption would be possible -- having proprietary/internal fields.
 
 KEF Encryption Format IS designed with open adoption as a goal!
-
 
 ---
 class: middle
@@ -479,7 +484,25 @@ class: middle
 - Bug or Feature? Can grind alternate decryption keys that result in useless/wrong plaintext bytes.
 
 ???
-The top 2 sections are very important.  The last one doesn't worry me.
+The top 2 sections are VERY important.
+
+The last one doesn't worry me.  KeyTeleport's docs imply a 2 byte auth for validation.
+
+
+---
+class: middle
+
+![weak_auth_bug_or_feature.png](./weak_auth_bug_or_feature.png)
+
+???
+EXPLAIN-QRs!
+Just because KEF can... doesn't imply that users should!
+But, can we actually stop them? If KEF is adopted (the goal) we must deal w/ it.
+Any 16b or 32b binary QR looks like a 12w or 24w compact SeedQR,
+Same for a 32 byte KEF as binary QR.
+The KEF Id and user's encryption key are normally entered via keypad, but
+these are "bytes" values and can also be scanned. Since that can result in
+unprintable ascii, consider displaying in 0xhex.
 
 
 ---
@@ -538,38 +561,35 @@ class: center, middle
 ![060-kef_backups_diss.png](./060-kef_backups_diss.png)
 
 ???
-Getting back considering our backups, and hardenning that plaintext, We don't always know the future for our family life.
+Getting back to considering our backups, and hardenning that plaintext.
+We don't always know our future, at home in our romantic life...
 
 ---
 class: center, middle
 ![072-got-kef.png](./072-got-kef.png)
 
 ???
-Or in our neighborhood, or the other side of the tracks, or online where folks get doxed
-and SWATed.
+Or in our neighborhood, or the other side of the tracks, or online where folks get doxed and SWATed.
 
 ---
 class: center, middle
 ![030-grampa_KEF.png](./030-grampa_KEF.png)
 
 ???
-We also don't know the future at our nation-state or global level, or what might happen 
-after an upcoming election.
+We also don't know the future at our nation-state or global level. What might happen after an upcoming election?  or a future crisis where printer-go-brrr doesn't fix it?
 
 
 ---
 class: center, middle
 ![050-KEF-frisson.png](./050-KEF-frisson.png)
 
+&lt; fin &gt;
+
 ???
 But we can choose at any time to harden our backups without modifying our wallet setup
 and without needing to involve on-chain activity... and we might consider doing so 
 on the only devices we can actually trust.
 
----
-class: middle, center
-
-&lt; fin &gt;
 
 ---
 class: middle
@@ -586,6 +606,24 @@ class: middle
 
 Let's try! 
 
+???
+Explain the "KEF dry-run" setup from mid August 2025:
+
+"Fellows, please blindly encrypt my KEF with a key you'll remember for me, Jean Do.
+I'm not asking you to "custody" any of my secrets, so please destroy mine.
+But I may send yours back to you and ask you to send me my KEF in return someday.
+Before doing that, please confirm that I seem 'safe', not in a rush, acting normal.
+Whatever you decide at that time is fine with me... wait days or weeks, or even refuse; you are free."
+
+Weeks later I confirmed with with a test:
+"Here's the KEF you blindly encrypted for me.  I don't want mine back yet, but If you can
+decrypt yours, you'll learn the key to the attached KEF-Cashu (as payment for the 
+registers I'm renting in the back of your head), and then I'll know that
+you have remembered your key... because I'll see that you claimed your cashu."
+
+The "setup" reasoning was that maybe I'd be able to destroy my KEF secrets and keep theirs
+instead, once I'm sure that I can get my KEFs back by sending them the KEFs they made for me.
+
 ---
 class: middle
 
@@ -593,16 +631,19 @@ class: middle
 
 Both links below express the same KEF Challenge envelope:
 
-- [KEFChallenge.mp4](./KEFChallenge.mp4) (4MB Fountain-QR UR-bytes mp4 file)
-  - Download and save to computer, view as mp4
-  - in DatumTool, load "via QR" to scan.
-  - expect 45s - 90s of QR scanning
-
-- [KEFChallenge.bin](./KEFChallenge.bin) (10K bin file)
+- Plan A:
+  [KEFChallenge.bin](./KEFChallenge.bin) (10K binary file)
   - Download and save to computer, copy to SD, insert SD in Krux device
   - in DatumTool, load "via SD" to import the file.
 
-The encryption key is in the title-bar of this slide-show (w/o " - Brave")
+- Plan B:
+  [KEFChallenge.mp4](./KEFChallenge.mp4) (4MB Fountain-QR UR-bytes MPEG-4 file)
+  - Download and save to computer, view as video
+  - in DatumTool, load "via QR" to scan.
+  - expect 45s - 90s of QR scanning; restart mp4 if necessary.
+
+**The decryption key for all KEFChallenge envelopes is in the title-bar**<br />
+(...of this slide-show.. without " - &lt; browser-name &gt;")
 
 Save the UTF-8 plaintext to SD, then read instructions in a text editor.
 
@@ -617,17 +658,24 @@ class: middle
 
 The following link is an image that I use as my desktop background.
 
-[bitcoinprecept_summons_jd.jpg](./bitcoinprecept_summons_jd.jpg)
-
 Ace, aka: BitcoinPrecept once shared this in the SeedsignerCommunity 
 telegram-group to get my attention for something.
 
-...except that the image file in the link above ALSO has the KEFChallenge embedded somewhere inside.  Can you see it? (hint: ask a photographer)
+- Plan C:
+
+  [KEFChallenge.jpg](./KEFChallenge.jpg) (236K JPEG file)
+
+  ...except that the image file ALSO has the KEFChallenge embedded somewhere inside.  Can you see it?
 
 
+---
 
+???
+3-of-6 KEF-Challenge wallet should have utxos:
 
+receive #0: bc1qcds5mtmjns8taxnhd3pmxc0dkx6tmp02wrxd9h8usrzujk49sups996s7v
 
+receive #1: bc1q6jnjlqfmh93k9hxpze2c4cn7n8hfx46jjdjwwxruqln59w9wxufsmze59q
 
 
 <!-- BEGIN `github.com/gnab/remark` FOOTER BOILERPLATE -->
