@@ -23,7 +23,7 @@ h1, h2, h3 {
 
 ???
 confirm mic levels, screen sharing, chat window. 
-Write blockheight-line, git add/commit/push,
+Add decryption key, write blockheight-line, git add/commit,
 got coffee, and water, take notes?
 
 ---
@@ -33,7 +33,7 @@ class: center, middle
 November 5th 2025, São Paulo, Brazil
 
 ```
-best=00000000000000000001bd6bd0460f0407be853315f7366501bc3f50e6eddf21 height=922172
+best=000000000000000000001c158261ec88eb51624087f3d47abfe0767e409488ba height=922313
 ```
 <hr>
 
@@ -41,10 +41,8 @@ best=00000000000000000001bd6bd0460f0407be853315f7366501bc3f50e6eddf21 height=922
 ...for air-gapped end-to-end encryption
 
 ???
-I'm Jean Do or JD.  I discovered seedsigner in late 2022 (Alex Waltz tweet), then followed embit, then krux in mid 2023 since I wanted to see other uses of embit and micropython.  My wife and daughters gifted me an Amigo for Father's Day, so I took a deeper look into Krux.
-
-Disclaimer: I have no training or education in cryptography.  If you do, please raise your 
-hand now so others know that you do, and raise it whenever I need to be corrected so others
+Disclaimer: I have no formal training or education in cryptography.  Those who do, 
+please raise your hand now so others know, and raise it whenever I need to be corrected so others
 can see.  Please jot notes for any of my assertions that need to be questioned later.
 
 
@@ -63,9 +61,10 @@ as well as examples, a few memes, and a KEF challenge.
 
 ???
 READ SLIDE!
-no live samples,
-will take questions if time-permits,
-challenge is audience-participation only.
+I'm hoping to sell the idea of KEF for peer-review and perhaps adoption by others.
+I have no live samples planned,
+I hope to take questions if time-permits,
+The KEF Challenge will be audience-participation only.
 
 
 ---
@@ -81,12 +80,12 @@ class: middle
 ### Must express **"Yes I can!"** in action - no exceptions
 
 ???
-Opine: All of us here are working on making it easier to answer "Yes!".
+ASSERT: All of us here are working to solve for this, being able to answer "Yes!".
 Did you create it? 
-Are you sure that "practically" nobody else could ever recreate it? 
-Will you remember it, or be able to retrieve it forever? 
-Are you sure that ONLY you can access it?
-Are you sure that you can use it w/o leaking it?
+Nobody could recreate it? 
+Will you remember it, or be able to retrieve it? 
+ONLY you can access it?
+Can use it w/o leaking it?
 
 
 ---
@@ -96,8 +95,8 @@ class: center, middle
 
 ???
 Both are fit, attractive, same size, similar features.
-plaintext is safely secured.
-But encrypted is walking confidently - alone in public.
+Plaintext is secure, she's in safe hands.
+But encrypted is walking confidently by herself.
 Might plaintext also look good encrypted?
 
 
@@ -117,7 +116,8 @@ Cons:
 
 ???
 READ-SLIDE!
-Plain works, but maybe it can remain "secured", w/o risk of leaks when accessed or distant.
+Plain backups work well, but maybe they can remain "secured", w/o risk of being leaked
+whenever they're accessed/tested/used, and when at rest -- when they're far off-site.
 
 
 ---
@@ -126,7 +126,7 @@ class: middle
 # Trade-offs of Encrypted Backups
 
 Pros:
-### Modify backups at any time w/o altering setup or onchain activity
+### Modify backups at any time w/o altering wallet and onchain activity
 ### Multiple backups; including ones only heirs/others can decrypt
 ### Plaintext secret revealed ONLY on-device
 
@@ -137,8 +137,6 @@ Cons:
 
 ???
 READ-SLIDE!
-Those who need KEF currently are reliant on Krux and less peer-reviewed projects, might they deserve being supported elsewhere too?
-
 
 ---
 class: center, middle
@@ -165,8 +163,8 @@ class: center, middle
 
 ???
 Originally, it was the "Krux encrypted mnemonic binary QR format", for mnemonics only.
-Recently, work analyzing, extending, defining and testing edges-cases - for general-use.
-EMPHASIZE preparation to free KEF for adoption by other projects.
+Recently, work has been done analyzing, extending, defining and testing edges - for general-use.
+EMPHASIZE: Also, preparation to free KEF for adoption by other projects.
 
 ---
 class: center, middle
@@ -175,18 +173,19 @@ class: center, middle
 ???
 Which other encryption standards for stateless signers?
 
-BullBitcoin's Recoverbull seems geared for hot wallets on a phone, solving for "backup" w/o spending too much time... so user can get started fast and maybe do normal backups later, or not at all.
+BullBitcoin's Recoverbull:  hot wallets, to get setup fast w/o having to make the backup.
 
-Coinkite's KeyTeleport: no complaints at all, but as a standard? Could argue that its design is around encouraging users to buy another device.  It's hard to argue that it was designed to be open and adopted by others, or even that adoption would be possible -- having proprietary/internal fields.
+Coinkite's KeyTeleport: arguably designed proprietary, a reason to buy another device, not
+as a standard for multiple projects.
 
-KEF Encryption Format IS designed with open adoption as a goal!
+KEF Encryption Format IS designed with adoption as a goal!
 
 ---
 class: middle
 
 ## KEF's Utility and Features
 
-- AES-256 (ECB/CBC/CTR/GCM), commonly hw-optimized.
+- AES-256 (ECB/CBC/CTR/GCM), commonly hw-accelerated.
 
 - 12 versions: to fit many use-cases;
 
@@ -194,12 +193,14 @@ class: middle
 
 - low-tech, simple implementation, far from bleeding-edge.
 
-- KEF envelopes hiding same plaintext are not linkable.
+- KEF envelopes that hide same plaintext are not linkable.
 
-- may be plausibly-deniable *or* may be fully-self-descriptive
+- may offer plausible-deniability *or* might be fully self-documenting.
 
 ???
 READ-SLIDE! Note: no versions hide length of plaintext... more versions for this?
+Non-linkability between envelopes wasn't exactly the case this summer (pre beta8),
+but is resolved.
 
 
 ---
@@ -227,7 +228,8 @@ class: middle
 - the **salt**, KEF **version**, **iterations**, and **cipher payload** are assembled into a minimalistic **KEF Envelope**.
 
 ???
-READ-SLIDE-TOP-2-LINES! In a nutshell: User supplies an encryption-key and an Id to encrypt.  Their key - as password and Id - as salt, are stretched to make a 256-bit AES key.  Plaintext is then encrypted, auth validation bytes - and others - are added as cipher payload, and everything is assembled into a minimalistic KEF envelope.
+READ-SLIDE-TOP-2-LINES!
+In a nutshell: User supplies an encryption-key (must be strong) and an Id (should be unique) to encrypt.  Their key - as password and Id - as salt, are stretched to make a 256-bit AES key.  Plaintext is then encrypted, IV/Nonce and auth validation bytes are added as cipher payload, and everything is assembled into a minimalistic KEF envelope.
 
 
 ---
@@ -331,7 +333,7 @@ Basic layout
 Specifics for each version
 
 - **KEF Implementation Concepts**:
-Introduction to Krux's KEF implementation and test-suite
+Introduction to Krux's KEF implementation (developed from its test-suite)
 
 ???
 READ-SLIDE bold only!
@@ -361,7 +363,7 @@ enough detail for an LMM to vibe-code a decryption routine.  This self-documenta
 function is also terse enough to fit into the Id field of a KEF envelope.
 
 Therefore, KEF envelopes can be plausibly deniable, but could also contain similar
-layout and ruleset documentation that they're ultra self-documenting.
+layout and ruleset documentation so that they're ultra self-documenting.
 
 ---
 class: center, middle
@@ -432,7 +434,7 @@ Notes:
 
 ???
 In summary: 
-block modes have 4 versions each (original v1, 2 padding strategies, and 1 for compressed);
+block modes have 4 versions each (original v1, 2 different padding strategies, and 1 for compressed);
 stream modes have 2 versions each (normal and compressed);
 Note: some versions expose auth bytes, requiring special treatment around this validation data.
 
@@ -459,8 +461,8 @@ even to nudge *users* towards the versions they prefer.  No authority exists to 
 Write the code and claim that you support KEF.  Others will open an *issue* or a *pull-request* if disputing a *claim* becomes necessary.
 
 ???
-READ-SLIDE top line only.  Any support for KEF is the start to adoption, decrypt only,
-or just for modes available on your platform.  It's FOSS, w/o a certification authority.
+READ-SLIDE top line only.  Any support for KEF is the start to adoption.  It can be decrypt only,
+or full support for versions that match your hadware platform.  It's FOSS, w/o a certification authority.
 
 
 ---
@@ -468,7 +470,7 @@ class: middle
 
 ## KEF Implementation Gotchas
 
-**Duplicate plaintext blocks using mode ECB**
+**If Duplicate plaintext blocks using mode ECB**
 - BE STRICT, FAIL TO ENCRYPT!!!
 - Select another Mode or ECB+compression which *may* result in plaintext without duplicate blocks.
 
@@ -486,7 +488,7 @@ class: middle
 ???
 The top 2 sections are VERY important.
 
-The last one doesn't worry me.  KeyTeleport's docs imply a 2 byte auth for validation.
+The last one doesn't worry me.
 
 
 ---
@@ -496,13 +498,25 @@ class: middle
 
 ???
 EXPLAIN-QRs!
-Just because KEF can... doesn't imply that users should!
-But, can we actually stop them? If KEF is adopted (the goal) we must deal w/ it.
-Any 16b or 32b binary QR looks like a 12w or 24w compact SeedQR,
-Same for a 32 byte KEF as binary QR.
-The KEF Id and user's encryption key are normally entered via keypad, but
-these are "bytes" values and can also be scanned. Since that can result in
-unprintable ascii, consider displaying in 0xhex.
+On the left:
+
+To a non-KEF aware scanner, it looks like a 24w compact SeedQR,
+Any 32b binary QR does, that's compact SeedQR format.
+
+But to a KEF aware scanner, it looks like a KEF.  If we give it the correct key "abc", we
+get the expected mnemonic and wallet.  But because authentication is only 3 bytes,
+it's possible to grind alternate keys that will pass "successful" validation without
+returning the original plaintext bytes.  This might be useful as a decoy.
+
+On the right:
+A KEF envelope is hiding a text message.  It was encrypted with the envelope on the left 
+via the alternate-key "421a8f".  Since resulting plaintext
+is a compact SeedQR of non-printable byte values, the key must be scanned (not easy to enter
+on a keypad). Krux displays the "key" to the user in 0xhex whenever it's not printable.
+
+Just because KEF can... doesn't imply that users should!  Note: Implementors may add brakes to stop this on the "Encrypt" end, but we cannot stop users from doing this with another implementation. 
+Implementations should do their best to decrypt all valid KEF envelopes (taking key via keypad 
+or scanned, displaying even binary keys for confirmation), making a best effort to recover user secrets.
 
 
 ---
@@ -512,9 +526,9 @@ class: middle
 
 **Falsely Identifying a bytestring as a KEF Envelope**
 
-Textual data won't be confused as a KEF envelope since KEF versions use unprintable bytes.
+Textual data won't be confused as a KEF envelope since KEF versions use non-printable byte values.
 
-Various bytestrings however, like binary PSBTs, will parse as a KEF envelope from time to time.  Therefore, different strategies for how to ingest a KEF might be:
+Various bytestrings however, like binary PSBTs, will parse as a KEF envelope from time to time (2-3 per 100?).  Therefore, different strategies for how to ingest a KEF might be:
 
 - **Explicitely as KEF**: Offer the choice for user to load a KEF envelope.
 
@@ -522,8 +536,7 @@ Various bytestrings however, like binary PSBTs, will parse as a KEF envelope fro
 
 - **Fallback to KEF**: try to parse data in context but if parsing fails, try as KEF.
 
-The user ALWAYS deserves to be presented with the KEF Envelope and offered a choice to 
-decrypt.
+**The user ALWAYS deserves to be presented with the KEF Envelope and offered a choice to decrypt.**
 
 ???
 READ-SLIDE!
@@ -596,7 +609,7 @@ class: middle
 
 ## KEF Challenge 
 
-**Can far-away anons, whom we've never met, help to secure our *secrets*?**
+- Can far-away anons, whom we've never met, help to secure our *secrets*?**
 
 - Can we secure our own *secret* with KEF, then ask someone else to blindly add another layer with a key that they'll remember whenever blindly encrypting ours?
 
@@ -629,53 +642,42 @@ class: middle
 
 ## KEF Challenge
 
-Both links below express the same KEF Challenge envelope:
+Part of the challenge is figuring out "What is the KEF Challenge?".
+Either of the Plans below will get you started:
 
 - Plan A:
   [KEFChallenge.bin](./KEFChallenge.bin) (10K binary file)
-  - Download and save to computer, copy to SD, insert SD in Krux device
-  - in DatumTool, load "via SD" to import the file.
+  - Download and save to computer, copy to SD, insert SD in Krux device,
+  - Boot Krux to "Tools / Datum Tool", load "From Storage" to import the file.
 
 - Plan B:
   [KEFChallenge.mp4](./KEFChallenge.mp4) (4MB Fountain-QR UR-bytes MPEG-4 file)
-  - Download and save to computer, view as video
-  - in DatumTool, load "via QR" to scan.
-  - expect 45s - 90s of QR scanning; restart mp4 if necessary.
+  - Play the video above,
+  - Boot Krux to "Tools / Datum Tool", load "via Camera" to scan.
+  - Expect 45s - 90s of QR scanning; replay video if necessary.<br />
+    (Pro-tip: sort your Krux device's focus-wheel if needed)
 
-**The decryption key for all KEFChallenge envelopes is in the title-bar**<br />
-(...of this slide-show.. without " - &lt; browser-name &gt;")
+**Use the case-sensitive &lt; title &gt; of *this* page as the decryption-key.**<br />
 
-Save the UTF-8 plaintext to SD, then read instructions in a text editor.
+The plaintext bytes are encoded so you might convert them to utf8 before viewing and 
+saving these instructions to SD, so that you can read them on a computer.
 
-Onward!
+Cheers!  - JD 
 
--JD
 
 ---
 class: middle
 
 ## KEF Challenge
 
-The following link is an image that I use as my desktop background.
+The following link is an image from Ace, aka: BitcoinPrecept. He shared it in a SeedSigner group.
 
-Ace, aka: BitcoinPrecept once shared this in the SeedsignerCommunity 
-telegram-group to get my attention for something.
 
 - Plan C:
 
   [KEFChallenge.jpg](./KEFChallenge.jpg) (236K JPEG file)
 
-  ...except that the image file ALSO has the KEFChallenge embedded somewhere inside.  Can you see it?
-
-
----
-
-???
-3-of-6 KEF-Challenge wallet should have utxos:
-
-receive #0: bc1qcds5mtmjns8taxnhd3pmxc0dkx6tmp02wrxd9h8usrzujk49sups996s7v
-
-receive #1: bc1q6jnjlqfmh93k9hxpze2c4cn7n8hfx46jjdjwwxruqln59w9wxufsmze59q
+  ...except that the image file ALSO has the KEFChallenge embedded somewhere inside.  Can you find it?
 
 
 <!-- BEGIN `github.com/gnab/remark` FOOTER BOILERPLATE -->
