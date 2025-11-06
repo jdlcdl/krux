@@ -560,7 +560,7 @@ Implementors will also need to consider encodings that make sense for storage an
 - **base43**: *(electrum)* same algo as base58; very compact for QRs; slow for large content.
 - **base64**: supported by all, compact for json - not so compact for QRs.
 
-Krux is biased to export base43 QRs, base64 to json, and binary to sdcard... but all-of-above are checked when injesting and all are available via DatumTool.
+Krux is biased to export base43 QRs, base64 to json, and binary to sdcard... but all-of-above are checked when ingesting and all are available via DatumTool.
 
 ???
 Since KEF envelopes have no magic-bytes, envelope length, or checksum, feel free to wrap KEF in whatever is needed.  I'd just ask for implentations to share their thoughts and try to embrace playing well with others.
@@ -609,7 +609,7 @@ class: middle
 
 ## KEF Challenge 
 
-- Can far-away anons, whom we've never met, help to secure our *secrets*?**
+- Can far-away anons, whom we've never met, help to secure our *secrets*?
 
 - Can we secure our own *secret* with KEF, then ask someone else to blindly add another layer with a key that they'll remember whenever blindly encrypting ours?
 
