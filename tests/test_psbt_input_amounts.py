@@ -118,7 +118,7 @@ def test_rejects_fabricated_non_witness_utxo_from_sdcard(mocker, m5stickv):
     mocker.patch("builtins.open", mock_open(MockFile(raw)))
 
     try:
-        # embit pr153 raises PSBTError("Duplicated key") in PSBT.read_from()"
+        # embit pr152 raises PSBTError("Duplicated key") in PSBT.read_from()"
         with pytest.raises(ValueError, match="Error loading PSBT file: Duplicated key"):
             PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
     except AssertionError:
@@ -334,7 +334,7 @@ def test_displayed_amount_is_the_signed_amount(mocker, m5stickv):
 
     mocker.patch("builtins.open", mock_open(MockFile(raw)))
     try:
-        # embit pr153 raises PSBTError("Duplicated key") in PSBT.read_from()"
+        # embit pr152 raises PSBTError("Duplicated key") in PSBT.read_from()"
         with pytest.raises(ValueError, match="Error loading PSBT file: Duplicated key"):
             signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
         return
@@ -395,7 +395,7 @@ def test_compressed_parse_keeps_legacy_psbt_usable(mocker, m5stickv):
 
     mocker.patch("builtins.open", mock_open(MockFile(raw)))
     try:
-        # embit pr153 raises PSBTError("Duplicated key") in PSBT.read_from()"
+        # embit pr152 raises PSBTError("Duplicated key") in PSBT.read_from()"
         with pytest.raises(ValueError, match="Error loading PSBT file: Duplicated key"):
             signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
         return
