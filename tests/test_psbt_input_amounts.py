@@ -116,8 +116,14 @@ def test_rejects_fabricated_non_witness_utxo_from_sdcard(mocker, m5stickv):
     raw = b"psbt\xff" + _kv(b"\x00", tx.serialize()) + b"\x00" + input_map + b"\x00"
 
     mocker.patch("builtins.open", mock_open(MockFile(raw)))
-    with pytest.raises(ValueError, match="Previous txid"):
-        PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
+
+    try:
+        # embit pr153 raises PSBTError("Duplicated key") in PSBT.read_from()"
+        with pytest.raises(ValueError, match="Error loading PSBT file: Duplicated key"):
+            PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
+    except AssertionError:
+        with pytest.raises(ValueError, match="Previous txid"):
+            PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
 
 
 def test_rejects_legacy_input_without_previous_tx(m5stickv):
@@ -327,7 +333,13 @@ def test_displayed_amount_is_the_signed_amount(mocker, m5stickv):
     )
 
     mocker.patch("builtins.open", mock_open(MockFile(raw)))
-    signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
+    try:
+        # embit pr153 raises PSBTError("Duplicated key") in PSBT.read_from()"
+        with pytest.raises(ValueError, match="Error loading PSBT file: Duplicated key"):
+            signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
+        return
+    except pytest.fail.Exception:
+        pass
 
     tx_input = signer.psbt.inputs[0]
     # The lie is still in the PSBT, it just is not what gets displayed
@@ -382,7 +394,13 @@ def test_compressed_parse_keeps_legacy_psbt_usable(mocker, m5stickv):
     raw = b"psbt\xff" + _kv(b"\x00", tx.serialize()) + b"\x00" + input_map + b"\x00"
 
     mocker.patch("builtins.open", mock_open(MockFile(raw)))
-    signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
+    try:
+        # embit pr153 raises PSBTError("Duplicated key") in PSBT.read_from()"
+        with pytest.raises(ValueError, match="Error loading PSBT file: Duplicated key"):
+            signer = PSBTSigner(_wallet(), None, FORMAT_NONE, "dummy.psbt")
+        return
+    except pytest.fail.Exception:
+        pass
 
     assert signer.psbt.inputs[0].non_witness_utxo is None
     assert signer.psbt.inputs[0].utxo.value == 100000000
